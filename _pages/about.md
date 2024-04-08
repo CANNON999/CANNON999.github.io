@@ -12,7 +12,10 @@ redirect_from:
 
 
 # 联系方式
-以下是我的微信和QQ二维码，欢迎大家与我联系！
+以下是我的微信和QQ二维码，欢迎大家与我联系！  
+<img src="WechatQR.png" width = "300"  alt="微信二维码" align=left />
+<img src="QQ_QR.png" width = "300"  alt="QQ二维码" align=right />
+
 
 
 
