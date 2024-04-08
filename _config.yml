@@ -23,8 +23,8 @@ author:
   # Biographic information
   avatar           : "IMG_3544(20211213-213416).PNG"
   name             : "xxXXxx"
-  pronouns         : # example: "男"  
-  bio              : "Short biography for the left-hand sidebar"
+  pronouns         : "男"  
+  bio              : # "Short biography for the left-hand sidebar"
   location         : "中国"
   employer         : "上海交通大学"
   uri              : # URL
@@ -32,10 +32,10 @@ author:
 
   # Academic websites
   arxiv            : # URL - Update with the correct link to your profile
-  googlescholar    : "https://scholar.google.com/citations?user=PS_CX0AAAAAJ"
+  googlescholar    : # "https://scholar.google.com/citations?user=PS_CX0AAAAAJ"
   impactstory      : # URL
-  orcid            : "http://orcid.org/yourorcidurl"
-  pubmed           : "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
+  orcid            : # "http://orcid.org/yourorcidurl"
+  pubmed           : # "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
   researchgate     : # URL
 
   # Repositories and software development
@@ -77,7 +77,7 @@ author:
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
 breadcrumbs              : false # true, false (default)
 words_per_minute         : 160
-future                   : true
+future                   : false
 read_more                : "disabled" # if enabled, adds "Read more" links to excerpts
 talkmap_link             : false #change to true to add link to talkmap on talks page
 comments:
