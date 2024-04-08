@@ -9,4 +9,4 @@ paperurl: 'http://academicpages.github.io/files/paper1.pdf'
 citation: ''
 ---
 
-The contents above will be part of a list of publications, if the user clicks the link for the publication than the contents of section will be rendered as a full page, allowing you to provide more information about the paper for the reader. When publications are displayed as a single page, the contents of the above "citation" field will automatically be included below this section in a smaller font.
+这是我对顽皮狗关卡设计进阶课的一次总结项目，项目体现了课程中的正负空间理论，遮挡关系，对点线面形状的强调和弱化，构图，空间分布和划分，寻路元素，玩家引导，关卡对玩家情感的激发以及射击游戏中掩体的射击。这也是我第一次独立进行流程较全面的关卡设计，我利用之前教程中自己搭建的第三人称射击游戏代码模板，搭建了游戏的基本框架，撰写了比较详细的关卡策划文档，利用xmind绘制了关卡动线图，并最终制作了关卡白盒。策划文档和关卡图纸以及项目文件会以百度网盘链接的形式附在下方，项目的演示视频链接也会在下方给出。
