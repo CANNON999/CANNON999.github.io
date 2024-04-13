@@ -3,7 +3,7 @@ title: "第三人称射击游戏关卡策划——梦醒之城"
 collection: publications
 permalink: /publication/2010-10-01-paper-title-number-2
 excerpt: '中大型箱庭关卡设计'
-date: 2010-10-01
+date: 2024-02-01
 venue: ''
 paperurl: 'https://docs.qq.com/doc/DV0tZaFVrVnBIWkR2'
 citation: ''
