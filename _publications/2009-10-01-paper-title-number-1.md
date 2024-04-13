@@ -2,7 +2,7 @@
 title: "半开放第三人称射击游戏关卡---深渊入口"
 collection: publications
 permalink: /publication/2009-10-01-paper-title-number-1
-excerpt: 'This paper is about the number 1. The number 2 is left for future work.'
+excerpt: '半开放式关卡设计'
 date: 2024-03-01
 venue: ''
 paperurl: 'https://docs.qq.com/doc/DV2h0Rlh6SW5OeE94'
