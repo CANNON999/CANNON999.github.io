@@ -15,8 +15,8 @@ redirect_from:
 以下是我的微信和QQ二维码，欢迎大家与我联系！  
 微信号：xxXxgrXxx  
 QQ号：1677012966  
-<img src="WechatQR.png">  
-<img src="QQ_QR.png">
+<img src="WechatQR.png" width = "300" align=left />  
+<img src="QQ_QR.png" width = "300" align=right />
 
 
 
