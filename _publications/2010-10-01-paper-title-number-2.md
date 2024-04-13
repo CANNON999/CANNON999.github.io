@@ -6,8 +6,8 @@ excerpt: '中大型箱庭关卡设计'
 date: 2024-02-01
 venue: ''
 paperurl: 'https://docs.qq.com/doc/DV0tZaFVrVnBIWkR2'
-citation: ''
+citation: '<img src="AwakenCastle.png">'
 ---
 
 这是我对《生化危机4：重制版》与《艾尔登法环》的箱庭式关卡的一次设计尝试。通过可能性空间，高低差，环路耦合的设计，尝试创造一段比较线性的，但又充满探索乐趣的游戏体验。我利用了之前自行搭建的第三人称射击游戏模板，搭建了游戏的基本框架，撰写了关卡设计文档，利用xmind绘制了关卡动线图，利用blender制作了关卡草模，并最终在UE5中搭建了关卡白盒。策划文档和关卡图纸会以链接的形式附在下方。  
-<img src="https://github.com/CANNON999/CANNON999.github.io/blob/master/_publications/AwakenCastle.png"  alt="AwakenCastle" height = "300" align=center />
+
