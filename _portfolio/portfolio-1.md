@@ -1,6 +1,6 @@
 ---
 title: "Blender程序化黑洞材质"
-excerpt: "Short description of portfolio item number 1<br/><img src='blackhole.png' height = "300">"
+excerpt: "Short description of portfolio item number 1<br/><img src='blackhole.png'>"
 collection: portfolio
 ---
 
