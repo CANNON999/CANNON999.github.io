@@ -1,6 +1,6 @@
 ---
 title: "机器人硬表面建模"
-excerpt: "硬表面建模<br/><img src='robot.png'>"
+excerpt: "硬表面建模<br/><img src='robot.jpg'>"
 collection: portfolio
 ---
 
