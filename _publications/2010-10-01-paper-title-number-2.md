@@ -17,7 +17,7 @@ citation: '<img src="AwakenCastle.png">'
 
 关卡5分钟介绍视频链接：[https://pan.baidu.com/s/17Jg0YMjmyusaWTAfy-falQ?pwd=1m3c](https://pan.baidu.com/s/17Jg0YMjmyusaWTAfy-falQ?pwd=1m3c)
 
-关卡全程演示视频链接：链接：[https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy](https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy)  
+关卡全程演示视频链接：[https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy](https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy)  
 
 关卡试玩包：[https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla](https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla)  
 
