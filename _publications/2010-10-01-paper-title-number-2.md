@@ -15,4 +15,6 @@ citation: '<img src="AwakenCastle.png">'
 
 演示视频链接：链接：[https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy](https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy)  
 
-关卡试玩包：[https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla](https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla)
+关卡试玩包：[https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla](https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla)  
+
+<img src="AwakenCastle.png">
