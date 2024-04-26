@@ -15,4 +15,6 @@ citation: '<img src="Entrance_of_Abyss.jpg">'
 
 演示视频链接：[https://pan.baidu.com/s/1jM6MyCUtFduvCCGOH47Jgg?pwd=u3uj](https://pan.baidu.com/s/1jM6MyCUtFduvCCGOH47Jgg?pwd=u3uj) 
 
+关卡试玩包：[https://pan.baidu.com/s/1gfVs1NdPhYRgzpz0zJxB1A?pwd=a1iv](https://pan.baidu.com/s/1gfVs1NdPhYRgzpz0zJxB1A?pwd=a1iv)
+
 
