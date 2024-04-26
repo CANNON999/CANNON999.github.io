@@ -13,6 +13,8 @@ citation: '<img src="Entrance_of_Abyss.jpg">'
 
 策划文档和关卡图纸: [https://docs.qq.com/doc/DV2h0Rlh6SW5OeE94](https://docs.qq.com/doc/DV2h0Rlh6SW5OeE94)  
 
+关卡5分钟介绍视频链接：[https://pan.baidu.com/s/1Acq2p1pXIqmGUHppxwIKxw?pwd=yv4s](https://pan.baidu.com/s/1Acq2p1pXIqmGUHppxwIKxw?pwd=yv4s)
+
 演示视频链接：[https://pan.baidu.com/s/1jM6MyCUtFduvCCGOH47Jgg?pwd=u3uj](https://pan.baidu.com/s/1jM6MyCUtFduvCCGOH47Jgg?pwd=u3uj) 
 
 关卡试玩包：[https://pan.baidu.com/s/1gfVs1NdPhYRgzpz0zJxB1A?pwd=a1iv](https://pan.baidu.com/s/1gfVs1NdPhYRgzpz0zJxB1A?pwd=a1iv)  
