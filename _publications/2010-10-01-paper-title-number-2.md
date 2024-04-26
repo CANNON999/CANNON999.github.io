@@ -14,3 +14,5 @@ citation: '<img src="AwakenCastle.png">'
 策划文档和关卡图纸：[https://docs.qq.com/doc/DV0tZaFVrVnBIWkR2](https://docs.qq.com/doc/DV0tZaFVrVnBIWkR2)  
 
 演示视频链接：链接：[https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy](https://pan.baidu.com/s/18xDA4UT_XW08MPzZbFBfYg?pwd=exqy)  
+
+关卡试玩包：[https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla](https://pan.baidu.com/s/1TqFZuV5bUmIbvbJfQPM0aA?pwd=1nla)
