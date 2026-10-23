@@ -1,0 +1,14 @@
+---
+import { getProjects, projectPath } from '../lib/content';
+export async function getStaticPaths() {
+  const aliases = [
+    { from: '/cv', to: '/about/' }, { from: '/resume', to: '/about/' }, { from: '/about.html', to: '/about/' },
+    { from: '/publications', to: '/works/?type=level' }, { from: '/portfolio', to: '/works/?type=art' },
+    { from: '/talks', to: '/works/?type=notes' },
+  ];
+  for (const p of await getProjects()) for (const from of p.data.legacy) aliases.push({ from, to: projectPath(p) });
+  return aliases.map(alias => ({ params: { legacy: alias.from.replace(/^\/+|\/+$/g, '') }, props: { destination: alias.to } }));
+}
+const { destination } = Astro.props;
+---
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta http-equiv="refresh" content={`0;url=${destination}`} /><link rel="canonical" href={new URL(destination, Astro.site)} /><meta name="robots" content="noindex" /><title>作品已迁移 — CANNON</title></head><body><p>作品已迁移至新版主页。<a href={destination}>继续访问 →</a></p></body></html>

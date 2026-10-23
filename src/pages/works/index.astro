@@ -1,0 +1,41 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getProjects, categories, projectPath } from '../../lib/content';
+const projects = await getProjects();
+---
+<Base title="作品库" page="collection-page">
+  <Header active="works" />
+  <main id="main-content" class="page-main">
+    <div class="page-intro"><p class="eyebrow">THE LIBRARY / {String(projects.length).padStart(2, '0')} PROJECTS</p><h1>想法的可玩形态<span>。</span></h1><p>关卡、游戏原型、视觉实验与设计思考。<br />每一个作品，都是一次关于体验的探索。</p><a class="text-link" href="/">← 回到主机视图</a></div>
+    <div class="filters" aria-label="按作品类型筛选" hidden>
+      <button type="button" data-filter="all" aria-pressed="true">全部作品 <span>{projects.length}</span></button>
+      {Object.entries(categories).map(([key, value]) => <button type="button" data-filter={key} aria-pressed="false">{value.label} <span>{projects.filter(p => p.data.category === key).length}</span></button>)}
+    </div>
+    <p class="sr-only" id="filter-status" role="status"></p>
+    <div class="work-grid">
+      {projects.map(p => <article class="work-card" data-category={p.data.category}>
+        <a href={projectPath(p)}><div class="work-cover">{p.data.cover ? <img src={p.data.cover} alt={p.data.title} width="960" height="540" loading="lazy" decoding="async" /> : <div class="notes-cover" aria-hidden="true">NOTES<br />ON PLAY<span>LOS SANTOS / OPEN WORLD</span></div>}<span class="work-open" aria-hidden="true">↗</span></div><p class="eyebrow">{categories[p.data.category].english}{p.data.year ? ` / ${p.data.year}` : ''}</p><h2>{p.data.title}</h2><p class="work-caption">{p.data.tagline}</p></a>
+      </article>)}
+    </div>
+  </main><Footer />
+  <script>
+    const filters = document.querySelector<HTMLElement>('.filters');
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const cards = [...document.querySelectorAll<HTMLElement>('.work-card')];
+    const allowed = buttons.map(button => button.dataset.filter);
+    if (filters) filters.hidden = false;
+    function selectFilter(category: string, updateURL = true) {
+      const selected = allowed.includes(category) ? category : 'all';
+      for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.filter === selected));
+      let count = 0;
+      for (const card of cards) { card.hidden = selected !== 'all' && card.dataset.category !== selected; if (!card.hidden) count++; }
+      document.querySelector('#filter-status')!.textContent = `显示 ${count} 件作品`;
+      if (updateURL) history.replaceState(null, '', selected === 'all' ? '/works/' : `/works/?type=${selected}`);
+    }
+    buttons.forEach(button => button.addEventListener('click', () => selectFilter(button.dataset.filter!)));
+    selectFilter(new URLSearchParams(location.search).get('type') || 'all', false);
+    addEventListener('popstate', () => selectFilter(new URLSearchParams(location.search).get('type') || 'all', false));
+  </script>
+</Base>

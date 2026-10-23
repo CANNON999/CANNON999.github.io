@@ -1,0 +1,10 @@
+---
+import type { Project } from '../lib/content';
+const { resources } = Astro.props as { resources: Project['data']['resources'] };
+---
+<div class="resource-list">
+  {resources.map(resource => <a href={resource.url} target="_blank" rel="noopener noreferrer" class="resource-link">
+    <span><strong>{resource.label}</strong><small>{resource.kind === 'video' ? '演示视频' : resource.kind === 'download' ? '项目下载' : resource.kind === 'source' ? '源文件' : '设计文档'}{resource.code ? ` · 提取码 ${resource.code}` : ''}</small></span>
+    <span aria-hidden="true">↗</span>
+  </a>)}
+</div>

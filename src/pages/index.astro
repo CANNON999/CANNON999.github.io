@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import profile from '../data/profile.json';
+import { getProjects, projectPath, categories } from '../lib/content';
+import '../styles/console.css';
+const projects = await getProjects();
+const entries = [
+  { id: 'profile', name: '个人介绍', short: 'PROFILE', cover: '', color: '#b6c9ec', href: '/about/' },
+  ...projects.map(p => ({ id: p.id, name: p.data.title, short: p.data.short, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
+];
+---
+<Base page="home">
+  <div class="console-shell" id="console-shell">
+    <div class="backdrop" aria-hidden="true">
+      <div class="world-image world-previous"></div><div class="world-image world-current"></div>
+      <div class="world-vignette"></div><canvas id="ambient-canvas"></canvas><div class="film-grain"></div>
+    </div>
+    <header class="topbar">
+      <a class="wordmark" href="/#profile" id="home-link">CANNON<span>个人创作空间</span></a>
+      <nav aria-label="主导航"><a href="/works/">作品库</a><a href="/about/">关于我</a><a href={`mailto:${profile.email}`}>联系</a></nav>
+      <a class="user-profile" href="/about/"><span class="avatar-mini" aria-hidden="true">C</span>{profile.name}</a>
+    </header>
+    <nav class="library" aria-label="横向作品库">
+      <div class="rail-window"><div class="rail-track" role="tablist" aria-label="作品选择" aria-orientation="horizontal">
+        {entries.map((entry, index) => <div class="cover-item">
+          <a class:list={['cover-button', { 'cover-profile': index === 0, 'cover-note': !entry.cover && index !== 0 }]} href={entry.href} id={`tile-${entry.id}`} role="tab" aria-selected={index === 0} aria-controls={`panel-${entry.id}`} aria-label={entry.name} tabindex={index === 0 ? 0 : -1} data-id={entry.id} data-cover={entry.cover} data-color={entry.color}>
+            {entry.cover ? <><img src={entry.cover} alt="" width="132" height="132" loading={index < 4 ? 'eager' : 'lazy'} decoding="async" /><span class="cover-word">{entry.short}</span></> : index === 0 ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
+          </a>
+          <span class="cover-name" aria-hidden="true">{entry.name}</span>
+        </div>)}
+      </div></div>
+      <div class="rail-controls"><button id="previous" type="button" aria-label="上一件作品" disabled>←</button><span id="wheel-hint">滚轮向下 · 向右浏览</span><button id="next" type="button" aria-label="下一件作品">→</button></div>
+      <div class="library-label"><a href="/works/">全部作品 ↗</a><span id="library-count">01 / {String(entries.length).padStart(2, '0')}</span></div>
+    </nav>
+    <main id="main-content" class="main-stage" tabindex="-1">
+      <section id="panel-profile" class="scene-panel" role="tabpanel" aria-labelledby="tile-profile">
+        <div class="project-copy">
+          <p class="project-kicker"><span class="status-indicator"></span>PLAYER 01 / ABOUT ME</p>
+          <p class="intro-greeting">你好，我是</p><h1>{profile.name}<span class="title-punctuation">。</span></h1>
+          <p class="project-subtitle">{profile.alias}</p><p class="project-description">{profile.description}</p>
+          <div class="project-tags">{profile.tags.map(tag => <span>{tag}</span>)}</div>
+          <div class="primary-actions"><a class="primary-button" id="explore-work" href="/works/">探索我的作品<span aria-hidden="true">→</span></a><a class="secondary-button" href="/about/">个人档案 <span aria-hidden="true">↗</span></a></div>
+          <div class="resource-links"><a href={`mailto:${profile.email}`}>联系我 ↗</a><a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+        </div>
+        <aside class="context-card" aria-label="个人资料">
+          <div class="context-art"><div class="profile-emblem">C<span>01</span></div><span class="context-art-label">CREATOR PROFILE</span></div>
+          <div class="context-body"><span class="context-eyebrow">BEHIND THE WORLDS</span><h2>以玩家视角，<br />构筑新的世界。</h2><dl><div><dt>创作领域</dt><dd>关卡 · 开发 · 美术</dd></div><div><dt>常用工具</dt><dd>Unreal Engine / Blender</dd></div></dl></div>
+        </aside>
+      </section>
+      {projects.map((project, i) => {
+        const d = project.data;
+        const video = d.resources.find(r => r.kind === 'video');
+        const document = d.resources.find(r => r.kind === 'document');
+        const download = d.resources.find(r => r.kind === 'download' || r.kind === 'source');
+        const secondary = video || document;
+        return <section id={`panel-${project.id}`} class="scene-panel" role="tabpanel" aria-labelledby={`tile-${project.id}`} hidden>
+          <div class="project-copy">
+            <p class="project-kicker"><span class="status-indicator"></span>{String(i + 1).padStart(2, '0')} / {categories[d.category].english}</p>
+            <h1>{d.title}</h1><p class="project-subtitle">{d.english}</p><p class="project-description">{d.summary}</p>
+            <div class="project-tags">{d.tags.map(tag => <span>{tag}</span>)}</div>
+            <div class="primary-actions"><a class="primary-button" href={projectPath(project)}>{d.category === 'notes' ? '阅读拆解' : d.category === 'art' ? '查看作品' : '进入项目'}<span aria-hidden="true">↗</span></a>{secondary && <a class="secondary-button" href={secondary.url} target="_blank" rel="noopener noreferrer">{video ? '观看演示' : '阅读文档'} ↗</a>}</div>
+            <div class="resource-links">{video && document && <a href={document.url} target="_blank" rel="noopener noreferrer">策划文档 ↗</a>}{download && <a href={download.url} target="_blank" rel="noopener noreferrer">{download.kind === 'download' ? '获取试玩包' : '项目文件'} ↗</a>}</div>
+          </div>
+          <aside class="context-card" aria-label="项目资料"><div class="context-art">{d.cover ? <img src={d.cover} alt="" width="480" height="298" loading="lazy" decoding="async" /> : <div class="field-note-art" aria-hidden="true">FIELD<br />NOTES</div>}<span class="context-art-label">{d.short}</span></div><div class="context-body"><span class="context-eyebrow">PROJECT FILE{d.year ? ` / ${d.year}` : ''}</span><h2>{d.tagline}</h2><dl><div><dt>我的职责</dt><dd>{d.role}</dd></div><div><dt>工具与方法</dt><dd>{d.tools.join(' / ')}</dd></div></dl></div></aside>
+        </section>;
+      })}
+    </main>
+    <footer class="bottom-bar"><span class="edition-label">CANNON / SELECTED WORK</span><div class="control-hints"><span><kbd>←</kbd><kbd>→</kbd> 切换作品</span><span><kbd>Enter</kbd> 查看详情</span></div><span class="touch-hint">↔ 左右轻扫，探索作品</span><div class="motion-controls"><button id="toggle-motion" type="button" aria-pressed="false">暂停动效</button><button id="replay-intro" type="button">◌ 重播开场</button></div></footer>
+    <p class="sr-only" id="selection-status" aria-live="polite" aria-atomic="true"></p>
+  </div>
+  <section class="boot-screen" id="boot-screen" aria-label="欢迎进入个人创作空间" hidden>
+    <canvas id="boot-canvas" aria-hidden="true"></canvas><div class="boot-mist" aria-hidden="true"></div>
+    <div class="boot-brand"><span class="boot-small">WELCOME TO MY WORLD</span><h2>CANNON<span>.</span></h2><p>每一个世界，都从一个想法开始。</p><div class="boot-progress" aria-hidden="true"><span></span></div></div>
+    <span class="boot-corner">PERSONAL PORTFOLIO / 肖冠荣</span><button id="skip-intro" type="button">进入主页 <span aria-hidden="true">↵</span></button>
+  </section>
+  <noscript><p class="no-js-note">可以直接点击封面查看作品，或<a href="/works/">打开全部作品</a>。</p></noscript>
+  <script>import '../scripts/console';</script>
+</Base>

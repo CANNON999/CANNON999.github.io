@@ -1,0 +1,15 @@
+{
+  "name": "肖冠荣",
+  "alias": "CANNON / xxXXxx",
+  "brand": "CANNON",
+  "title": "游戏行业从业者",
+  "email": "1677012966@qq.com",
+  "github": "https://github.com/CANNON999",
+  "description": "一名游戏行业从业者。\n从关卡设计到游戏开发，再到 3D 视觉，\n把想法变成可以走进去的世界。",
+  "bio": "我是肖冠荣，也可以叫我 Cannon / xxXXxx。我希望成为一名游戏制作人，关注游戏如何组织空间、引导玩家，并通过关卡、原型和视觉作品表达想法。",
+  "tags": ["关卡设计", "游戏开发", "3D 视觉"],
+  "tools": ["Unreal Engine", "Blender", "C++", "XMind"],
+  "education": { "school": "上海交通大学", "department": "巴黎卓越工程师学院 · 机械专业", "period": "2021.09 — 2025.06" },
+  "languages": ["英语（CET-6）", "法语"],
+  "interests": ["游戏", "电影", "阅读", "远足"]
+}

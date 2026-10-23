@@ -1,0 +1,47 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ResourceLinks from '../../components/ResourceLinks.astro';
+import { getProjects, projectPath, categories } from '../../lib/content';
+export async function getStaticPaths() {
+  const all = await getProjects();
+  return all.map((project, index) => ({ params: { id: project.id }, props: { project, next: all[(index + 1) % all.length] } }));
+}
+const { project, next } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+---
+<Base title={d.title} description={d.summary.replaceAll('\n', '')} image={d.cover} page="detail-page">
+  <Header active="works" />
+  <main id="main-content">
+    <div class="detail-topline"><a class="text-link" href={`/#${project.id}`}>← 返回作品选择</a><button type="button" class="text-link share-button" hidden>复制项目链接 ↗</button><span class="sr-only" id="share-status" role="status"></span></div>
+    <header class="detail-hero">
+      {d.cover ? <img class="detail-background" src={d.cover} alt="" width="1920" height="1080" fetchpriority="high" /> : <div class="detail-background notes-background" aria-hidden="true"></div>}
+      <div class="detail-hero-shade"></div><div class="detail-hero-copy"><p class="eyebrow">{categories[d.category].english}{d.year ? ` / ${d.year}` : ''}</p><h1>{d.title}<span>。</span></h1><p>{d.english}</p><div class="detail-tags">{d.tags.map(tag => <span>{tag}</span>)}</div></div>
+    </header>
+    <div class="detail-layout">
+      <article class="article-body"><p class="article-lead">{d.tagline}</p><Content /></article>
+      <aside class="project-info" aria-label="项目资料与资源"><p class="eyebrow">PROJECT FILE</p><dl><div><dt>我的职责</dt><dd>{d.role}</dd></div><div><dt>工具与方法</dt><dd>{d.tools.join(' / ')}</dd></div></dl>{d.resources.length > 0 && <><h2>进入作品</h2><ResourceLinks resources={d.resources} /></>}<a class="text-link" href="/about/">认识创作者 ↗</a></aside>
+    </div>
+    <a class="next-project" href={projectPath(next)}><span class="eyebrow">CONTINUE EXPLORING / 下一个作品</span><strong>{next.data.title}</strong><span aria-hidden="true">↗</span></a>
+  </main><Footer />
+  <script>
+    const share = document.querySelector<HTMLButtonElement>('.share-button');
+    if (share && navigator.clipboard?.writeText) {
+      share.hidden = false;
+      share.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(location.origin + location.pathname);
+          share.textContent = '链接已复制 ✓';
+          document.querySelector('#share-status')!.textContent = '项目链接已复制，可以分享给朋友。';
+          setTimeout(() => { share.textContent = '复制项目链接 ↗'; }, 2400);
+        } catch {
+          document.querySelector('#share-status')!.textContent = '复制未完成，请复制浏览器地址栏中的网址。';
+          share.textContent = '请复制地址栏中的网址';
+        }
+      });
+    }
+  </script>
+</Base>
