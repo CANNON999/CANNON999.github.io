@@ -39,6 +39,20 @@ const home = await readFile(resolve(root, 'index.html'), 'utf8');
 const tabCount = [...home.matchAll(/role="tab"/g)].length;
 const panelCount = [...home.matchAll(/role="tabpanel"/g)].length;
 if (tabCount !== panelCount || tabCount < 2) failures.push(`Tabs (${tabCount}) do not match panels (${panelCount}).`);
+const attr = (tag, name) => new RegExp(`(?:^|\\s)${name}="([^"]*)"`).exec(tag)?.[1];
+const tabTags = [...home.matchAll(/<a\b[^>]*role="tab"[^>]*>/g)].map(match => match[0]);
+const panelTags = [...home.matchAll(/<section\b[^>]*role="tabpanel"[^>]*>/g)].map(match => match[0]);
+const controlled = new Set();
+for (const tab of tabTags) {
+  const id = attr(tab, 'id');
+  const target = attr(tab, 'aria-controls');
+  const panel = panelTags.find(tag => attr(tag, 'id') === target);
+  if (!panel || attr(panel, 'aria-labelledby') !== id || controlled.has(target)) failures.push(`Invalid tab/panel relationship: ${id}.`);
+  controlled.add(target);
+}
+const selected = tabTags.filter(tag => attr(tag, 'aria-selected') === 'true');
+const visible = panelTags.filter(tag => !/\shidden(?:\s|=|>)/.test(tag));
+if (selected.length !== 1 || attr(selected[0] || '', 'id') !== 'tile-profile' || visible.length !== 1 || attr(visible[0] || '', 'id') !== 'panel-profile') failures.push('Home must start with only the profile tab and panel selected.');
 const sitemap = await readFile(resolve(root, 'sitemap.xml'), 'utf8');
 if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push('Missing project sitemap route.');
 if (failures.length) {

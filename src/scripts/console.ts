@@ -1,4 +1,5 @@
 import { createPortfolioDust } from './particles.js';
+import { WheelNavigator, wheelIntent } from './wheel-navigation';
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = byId('console-shell');
@@ -27,6 +28,7 @@ let lastFrame = 0;
 let motionTime = 0;
 try { paused = localStorage.getItem('cannon-motion') === 'paused'; } catch { /* Storage can be unavailable in private contexts. */ }
 const motionOff = () => paused || reduced.matches;
+const wheel = new WheelNavigator();
 
 function positionRail() {
   const css = getComputedStyle(document.documentElement);
@@ -57,13 +59,14 @@ async function setBackground(cover: string) {
   front.style.opacity = cover ? '.83' : '0';
   if (!motionOff()) {
     backgroundAnimations = [
-      front.animate([{ opacity: 0, transform: 'scale(1.018)' }, { opacity: cover ? .83 : 0, transform: 'scale(1)' }], { duration: 820, easing: 'cubic-bezier(.2,.65,.25,1)' }),
-      back.animate([{ opacity: back.style.opacity }, { opacity: 0 }], { duration: 820, fill: 'forwards', easing: 'ease-out' }),
+      front.animate([{ opacity: 0, transform: 'scale(1.012)' }, { opacity: cover ? .83 : 0, transform: 'scale(1)' }], { duration: 620, easing: 'cubic-bezier(.2,.65,.25,1)' }),
+      back.animate([{ opacity: back.style.opacity }, { opacity: 0 }], { duration: 620, fill: 'forwards', easing: 'ease-out' }),
     ];
   } else back.style.opacity = '0';
 }
 
-function select(index: number, focus = false, updateHash = true) {
+function select(index: number, focus = false, updateHash = true, fromWheel = false) {
+  if (!fromWheel) wheel.reset();
   const next = Math.max(0, Math.min(tabs.length - 1, index));
   const changed = next !== current;
   current = next;
@@ -82,7 +85,7 @@ function select(index: number, focus = false, updateHash = true) {
   positionRail();
   if (changed) {
     copyAnimation?.cancel();
-    if (!motionOff()) copyAnimation = panels[current].querySelector('.project-copy')!.animate([{ opacity: .15, transform: 'translateY(9px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 460, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    if (!motionOff()) copyAnimation = panels[current].querySelector('.project-copy')!.animate([{ opacity: .25, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
   }
   void setBackground(selected.dataset.cover || '');
   if (updateHash) history.replaceState(null, '', `#${selected.dataset.id}`);
@@ -99,20 +102,18 @@ byId('explore-work').addEventListener('click', event => { event.preventDefault()
 byId('home-link').addEventListener('click', event => { event.preventDefault(); select(0); });
 window.addEventListener('hashchange', () => { const index = tabs.findIndex(tab => `#${tab.dataset.id}` === location.hash); if (index >= 0) select(index, false, false); });
 
-// Consume one gesture, including trackpad inertia. Let short/zoomed pages scroll normally.
-let wheelTotal = 0, lastWheel = 0, consumed = false, lastSwitch = -1000;
+// Keep gesture recognition independent from CSS/scene animation completion.
 shell.addEventListener('wheel', event => {
-  if (bootVisible || event.ctrlKey || event.metaKey) return;
-  if (shell.scrollHeight > innerHeight + 2 && !(event.target as Element).closest('.library')) return;
-  const delta = (Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY) * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1);
+  const delta = wheelIntent(event, {
+    intro: bootVisible,
+    overflowing: shell.scrollHeight > innerHeight + 2,
+    overLibrary: Boolean((event.target as Element).closest('.library')),
+    viewportHeight: innerHeight,
+  });
   if (!delta) return;
   event.preventDefault();
-  const now = performance.now();
-  if (now - lastWheel > 180) { wheelTotal = 0; consumed = false; }
-  lastWheel = now;
-  if (consumed || now - lastSwitch < (motionOff() ? 180 : 460)) return;
-  wheelTotal += delta;
-  if (Math.abs(wheelTotal) >= 42) { select(current + Math.sign(wheelTotal)); consumed = true; lastSwitch = now; }
+  const direction = wheel.push(delta, performance.now(), event.deltaMode !== 0);
+  if (direction) select(current + direction, false, true, true);
 }, { passive: false });
 
 document.addEventListener('keydown', event => {
@@ -178,6 +179,7 @@ function endIntro(immediate = false) {
 }
 function startIntro() {
   if (motionOff()) return;
+  wheel.reset();
   clearTimeout(bootTimer); clearTimeout(hideTimer);
   boot.hidden = false; boot.classList.remove('is-hidden'); boot.inert = false; shell.inert = true; bootVisible = true;
   bootDust.resize();
@@ -205,7 +207,7 @@ motionButton.addEventListener('click', () => {
   updateMotion();
 });
 reduced.addEventListener('change', updateMotion);
-document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
+document.addEventListener('visibilitychange', () => { wheel.reset(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
 window.addEventListener('resize', () => { positionRail(); ambientDust.resize(); bootDust.resize(); resumePaint(); });
 window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); endIntro(true); } });
 window.addEventListener('pagehide', () => { cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
