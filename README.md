@@ -95,19 +95,23 @@ legacy: []
 
 新增内容会自动出现在主页横向栏、作品库、独立详情页和 sitemap 中，无需修改页面代码。未发布的草稿不会生成详情页。
 
-## 首次发布到 GitHub Pages
+## 发布到 GitHub Pages
 
-当前 GitHub 连接能读取仓库，但创建备份分支返回 403，远端写入尚未完成。旧站仍然保持原样。新站的源文件已准备好；请不要把 `node_modules/`、`dist/`、备份目录或本地预览图提交到源代码分支。
+发布仓库是 `CANNON999/CANNON999.github.io`，发布分支是 `master`，公开地址是 <https://cannon999.github.io/>。
 
-获得 `CANNON999/CANNON999.github.io` 的仓库写入权限后：
+本项目默认交付流程：完成开发 → `pnpm verify` → 提交并推送 → 等待 Actions 构建与部署成功 → 检查公开页面。用户已授权常规开发完成后直接发布，无需逐次确认，协作约定见 `AGENTS.md`。只有部署成功且线上检查通过，才能报告“已上线”。
 
-1. 创建远端 `backup/legacy-2026-10-23`，指向 `da8fc5f05245c1bc985c681a6cb77a90c1c592ac`，保留旧站恢复点。
-2. 将首版提交到独立的 `redesign/v1` 分支，先检查差异与构建结果。
-3. 在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。
-4. 合并审核过的首版到 `master`。工作流会检查内容、构建、校验资源后部署。
-5. 在 Actions 中确认部署成功，再访问公开网址。后续更新只需提交内容文件。
+首次配置或迁移电脑时：
 
-工作流使用 Astro 官方部署 action，参考：[Astro 的 GitHub Pages 部署说明](https://docs.astro.build/en/guides/deploy/github/)。当前 Actions 尚未在远端运行，本地构建已验证。
+1. 使用 GitHub CLI 的浏览器登录完成仓库写入授权，更新工作流还需要 `workflow` 权限。凭据保留在系统凭据管理中，不写入项目文件。
+2. 在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**，无需添加新的示例工作流。
+3. 保留旧站分支 `backup/legacy-2026-10-23`，指向 `da8fc5f05245c1bc985c681a6cb77a90c1c592ac`。
+4. 获取远端最新状态，将验证通过的修改正常提交到 `master`，不要强制覆盖历史。
+5. 在仓库 Actions 中查看对应提交的 `Build and deploy portfolio`，确认构建与部署均成功，再检查主页、作品详情和图片。
+
+请不要把 `node_modules/`、`dist/`、凭据、备份目录或本地预览图提交到源代码分支。登录失效时重新进行官方浏览器授权，不要在聊天中发送密码或访问令牌。
+
+工作流使用 Astro 官方部署 action，参考：[Astro 的 GitHub Pages 部署说明](https://docs.astro.build/en/guides/deploy/github/)。GitHub 在云端运行构建并托管静态页面，本机关闭后公开网站仍可访问。
 
 GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度需要上线后实测。如以后增加镜像托管，可复用同一个 `dist/`，无需重写页面。
 
