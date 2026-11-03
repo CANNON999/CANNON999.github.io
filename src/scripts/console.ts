@@ -224,8 +224,23 @@ for (const image of homeImages) {
 async function prepareHome(showLoading: boolean) {
   const generation = ++readinessGeneration;
   const started = performance.now();
+  let allDecoded = false;
   if (showLoading) { showBoot('loading'); shell.setAttribute('aria-busy', 'true'); }
   const result = await prepareImages([...imageGroups.keys()], {
+    onAllReady: () => {
+      if (generation !== readinessGeneration) return;
+      allDecoded = true;
+      for (const image of homeImages) delete image.dataset.unavailable;
+      try { sessionStorage.setItem('cannon-ready-v2', root.dataset.assetKey!); } catch { /* Internal navigation also skips startup. */ }
+      if (showLoading && (introMode === 'loading' || introMode === 'error')) {
+        byId('boot-status').textContent = '作品已准备就绪';
+        byId('boot-detail').textContent = `已准备 ${imageGroups.size} / ${imageGroups.size}`;
+        byId('boot-progress').setAttribute('aria-valuenow', '100');
+        byId('boot-progress').style.setProperty('--load-progress', '1');
+        const remaining = motionOff() ? 0 : Math.max(0, 600 - (performance.now() - started));
+        bootTimer = setTimeout(() => { if (generation === readinessGeneration) endIntro(); }, remaining);
+      }
+    },
     load: async url => {
       const images = imageGroups.get(url)!;
       // Reassign only failed images to allow the retry button to request them again.
@@ -233,14 +248,14 @@ async function prepareHome(showLoading: boolean) {
       await Promise.all(images.map(image => image.decode()));
     },
     onProgress: ({ ready, total }) => {
-      if (generation !== readinessGeneration || !showLoading) return;
+      if (generation !== readinessGeneration || !showLoading || allDecoded) return;
       byId('boot-status').textContent = '正在加载作品…';
       byId('boot-detail').textContent = `已准备 ${ready} / ${total}`;
       byId('boot-progress').setAttribute('aria-valuenow', String(total ? Math.round(ready / total * 100) : 100));
       byId('boot-progress').style.setProperty('--load-progress', String(total ? ready / total : 1));
     },
   });
-  if (generation !== readinessGeneration) return;
+  if (generation !== readinessGeneration || allDecoded) return;
   if (result.failed.length) {
     for (const url of result.failed) for (const image of imageGroups.get(url)!) image.dataset.unavailable = 'true';
     if (!showLoading) return;
@@ -251,12 +266,6 @@ async function prepareHome(showLoading: boolean) {
     byId('skip-intro').hidden = false;
     byId('retry-loading').focus({ preventScroll: true });
     return;
-  }
-  for (const image of homeImages) delete image.dataset.unavailable;
-  try { sessionStorage.setItem('cannon-ready-v2', root.dataset.assetKey!); } catch { /* Internal navigation also skips startup. */ }
-  if (showLoading) {
-    const remaining = motionOff() ? 0 : Math.max(0, 600 - (performance.now() - started));
-    bootTimer = setTimeout(() => { if (generation === readinessGeneration) endIntro(); }, remaining);
   }
 }
 byId('retry-loading').addEventListener('click', () => { void prepareHome(true); });

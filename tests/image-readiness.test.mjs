@@ -40,3 +40,27 @@ test('L06: a failed attempt does not poison a later successful retry', async () 
   assert.deepEqual(first.failed, ['a']);
   assert.deepEqual(await prepareImages(['a'], { load: async () => {} }), { ready: 1, total: 1, failed: [] });
 });
+test('L07: late decodes notify readiness exactly once after the recovery deadline', async () => {
+  const releases = {}; let fullyReady = 0;
+  const result = await prepareImages(['a', 'b'], {
+    load: url => new Promise(resolve => { releases[url] = resolve; }), timeoutMs: 10,
+    onAllReady: () => { fullyReady++; },
+  });
+  assert.equal(result.failed.length, 2);
+  assert.equal(fullyReady, 0);
+  releases.a(); await flush();
+  assert.equal(fullyReady, 0);
+  releases.b(); await flush();
+  assert.equal(fullyReady, 1);
+  assert.equal(result.ready, 0); // The original deadline result remains an honest snapshot.
+});
+test('L08: readiness callback works for normal and empty pages but never for failed decoding', async () => {
+  let notifications = 0;
+  const onAllReady = () => { notifications++; };
+  await prepareImages(['a', 'a', 'b'], { load: async () => {}, onAllReady });
+  assert.equal(notifications, 1);
+  await prepareImages([], { load: async () => {}, onAllReady });
+  assert.equal(notifications, 2);
+  await prepareImages(['a', 'broken'], { load: async url => { if (url === 'broken') throw Error('decode'); }, onAllReady });
+  assert.equal(notifications, 2);
+});
