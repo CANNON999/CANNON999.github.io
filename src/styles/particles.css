@@ -1,0 +1,22 @@
+/* A single native-resolution field shared by startup and the personal profile. */
+.home{background:#090b14}
+.particle-stage{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#10121d;opacity:1;transition:opacity .45s ease}
+.particle-light{position:absolute;inset:0;background:radial-gradient(ellipse 33% 88% at 17% -9%,#d7b5a078,transparent 76%),radial-gradient(ellipse 46% 85% at 8% 40%,#b1a39a33,transparent 75%),radial-gradient(ellipse 53% 17% at 20% 90%,#b2c8d33a,transparent 75%),linear-gradient(110deg,#1b1c242b,#080a1500 68%)}
+.particle-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.home[data-particles=off] .particle-stage{opacity:0}
+.home .console-shell{z-index:1;background:transparent;opacity:1;transition:opacity .45s ease}
+html[data-startup]:not([data-startup=ready]) .console-shell{opacity:0}
+.home[data-scene=profile] .backdrop{background:transparent}
+.home[data-scene=profile] .world-vignette{background:linear-gradient(90deg,#07091254,transparent 62%),linear-gradient(0deg,#06081040,transparent 24%)}
+.home[data-scene=profile] .film-grain{display:none}
+.home .boot-screen{display:flex;background:transparent;transition:opacity .45s ease,visibility .45s;outline:none}
+.home .boot-brand{animation:none;transform:translateY(-12px)}
+.home .boot-brand h2{font-size:52px;letter-spacing:12px;font-weight:300;margin:25px 0 22px}
+.home .boot-brand>p{font-size:16px;letter-spacing:2px;line-height:1.7;color:#e1dbd4}
+.home .boot-progress{height:2px;width:150px;margin:26px auto 13px;background:#eee2d515;border-radius:2px}
+.home .boot-progress span{animation:none;transform:scaleX(var(--load-progress,0));background:#e2c59a;transition:transform .2s ease}
+.boot-detail{font-size:10px;letter-spacing:1px;color:#b3acaa}
+#retry-loading{display:block;margin:24px auto 0;border:1px solid #e6d2b33b;border-radius:24px;padding:12px 24px;background:#d6c6ae12;color:#e8ddd0;font-size:12px;min-height:44px}
+.home img[data-unavailable=true]{opacity:0}
+@media(max-width:600px){.particle-light{background:radial-gradient(ellipse 70% 75% at 10% -5%,#d7b5a040,transparent 78%),radial-gradient(ellipse 80% 18% at 20% 92%,#aabac322,transparent 76%)}.home .boot-brand h2{font-size:40px;letter-spacing:8px}.home .boot-brand>p{font-size:14px;letter-spacing:1px}}
+@media(prefers-reduced-motion:reduce){.home .boot-screen{display:flex}.particle-stage,.home .console-shell{transition:none}}

@@ -53,6 +53,12 @@ for (const tab of tabTags) {
 const selected = tabTags.filter(tag => attr(tag, 'aria-selected') === 'true');
 const visible = panelTags.filter(tag => !/\shidden(?:\s|=|>)/.test(tag));
 if (selected.length !== 1 || attr(selected[0] || '', 'id') !== 'tile-profile' || visible.length !== 1 || attr(visible[0] || '', 'id') !== 'panel-profile') failures.push('Home must start with only the profile tab and panel selected.');
+const images = [...home.matchAll(/<img\b[^>]*>/g)].map(match => match[0]);
+if (images.some(tag => attr(tag, 'loading') !== 'eager' || attr(tag, 'decoding') !== 'async')) failures.push('All home images must be available to the startup decode gate.');
+if ([...home.matchAll(/<canvas\b/g)].length !== 1 || !home.includes('id="ambient-canvas"')) failures.push('Startup and profile must share a single particle canvas.');
+const head = home.slice(0, home.indexOf('</head>'));
+if (!head.includes('cannon-ready-v2') || !head.includes('visibility:hidden')) failures.push('First-paint readiness gate must be in the document head.');
+if (!home.includes('id="retry-loading"') || !home.includes('id="skip-intro"')) failures.push('Image failures must provide recovery controls.');
 const sitemap = await readFile(resolve(root, 'sitemap.xml'), 'utf8');
 if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push('Missing project sitemap route.');
 if (failures.length) {

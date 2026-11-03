@@ -39,7 +39,8 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
-- [V1.0.1 测试报告](docs/test-results/2026-10-30-v1.0.1.md)：本次实际结果与未覆盖项。
+- [V1.1.0 测试报告](docs/test-results/2026-11-03-v1.1.0.md)：粒子背景、首次加载和相关回归的实际结果与边界。
+- [V1.0.1 测试报告](docs/test-results/2026-10-30-v1.0.1.md)：此前触控板修复与用户验收记录。
 
 每次新功能或修复都维护上述记录并补对应测试。`pnpm test` 运行输入和内容脚本回归；`pnpm verify` 会先运行测试再检查、构建与校验资源。GitHub 自动发布也运行同一套验证，失败时不会部署。
 
@@ -53,7 +54,9 @@ pnpm verify
 | 主机界面布局与响应式样式 | `src/styles/console.css` |
 | 作品列表、详情、个人档案样式 | `src/styles/global.css` |
 | 滚轮、键盘、开场、动效偏好 | `src/scripts/console.ts` |
-| 粒子绘制 | `src/scripts/particles.js` |
+| 粒子构图、运动、分辨率与性能策略 | `src/scripts/particle-field.ts`、`src/scripts/particles.ts` |
+| 粒子背景光照与加载界面样式 | `src/styles/particles.css` |
+| 首次访问判断、图片等待和异常恢复 | `src/scripts/entry-gate.ts`、`src/scripts/image-readiness.ts`、`src/scripts/console.ts` |
 | 内容字段校验 | `src/content.config.ts` |
 | GitHub Pages 自动构建与发布 | `.github/workflows/pages.yml` |
 
@@ -138,12 +141,25 @@ GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度�
 
 ## 交互与实现约定
 
-- 首次进入默认显示个人介绍，开场每个标签页会话播放一次，可以立即跳过或手动重播。
+- 首次进入先显示动态粒子和加载提示，首页图片完成解码后连续进入个人介绍；同标签页、站内返回及作品切换不强制重播。图片失败或超过 12 秒时可重试或主动进入；手动重播可立即跳过。
 - 滚轮向下/右选择下一项，向上/左选择上一项；普通轻扫一项，连续新手势可在惯性尾部和动画中响应；持续稳定推移可以继续浏览，衰减惯性不连跳。
 - 点击封面选择作品，方向键切换；封面获焦时 Home/End 跳到首尾，Enter 打开详情。
 - 手机支持横向手势；短屏或放大页面可以正常纵向滚动，详情页始终按常规方式阅读。
-- 支持系统“减少动态效果”和手动暂停；页面隐藏时停止粒子帧循环。
+- 粒子画布匹配显示器实际 DPR；性能不足时减少数量和更新频率，不降低画布分辨率。支持系统“减少动态效果”和手动暂停；作品画面及页面隐藏时停止粒子帧循环。
 - 没有 JavaScript 时仍可通过封面链接、作品库和详情页访问内容。
 - 不自动播放音频，不使用访客账号、表单后端或统计追踪。
 
 视觉灵感来自主机界面，品牌、内容和粒子实现属于此个人主页；没有嵌入 PlayStation 启动画面或游戏商标作为网站标识。
+
+## 加载行为的本地验证
+
+构建后可启动测试服务器，用不同端口隔离会话。以下选项只在本地模拟网络，不会进入线上业务代码：
+
+```sh
+python3 scripts/preview-test-server.py --port 4322 --delay-images-ms 4500
+python3 scripts/preview-test-server.py --port 4323 --fail-image abyss --fail-once --delay-images-ms 500
+python3 scripts/preview-test-server.py --port 4324 --delay-images-ms 15000
+python3 scripts/preview-test-server.py --port 4325 --fail-scripts
+```
+
+依次检查慢图遮挡、失败重试、超时继续以及脚本失败回退；每个服务器在其终端按 Control+C 停止。粒子实际采样写在 `#ambient-canvas` 的 `data-fps`、`data-draw-ms`、`data-particles` 等属性中，每 60 次绘制更新一次。`draw-ms` 仅是 JS 绘制指令提交耗时，不能当作完整 GPU 帧时间。

@@ -3,17 +3,35 @@ import Base from '../layouts/Base.astro';
 import profile from '../data/profile.json';
 import { getProjects, projectPath, categories } from '../lib/content';
 import '../styles/console.css';
+import '../styles/particles.css';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { installEntryGate } from '../scripts/entry-gate';
 const projects = await getProjects();
 const entries = [
   { id: 'profile', name: '个人介绍', short: 'PROFILE', cover: '', color: '#b6c9ec', href: '/about/' },
   ...projects.map(p => ({ id: p.id, name: p.data.title, short: p.data.short, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
 ];
+const assetHash = createHash('sha256');
+for (const url of [...new Set(entries.map(e => e.cover).filter(Boolean))]) {
+  // Astro relocates this module during prerender; the build cwd remains the project root.
+  assetHash.update(url).update(readFileSync(`public${url}`));
+}
+const assetKey = assetHash.digest('hex').slice(0, 16);
+const entryScript = `(${installEntryGate.toString()})(${JSON.stringify(assetKey)})`;
 ---
 <Base page="home">
+  <script slot="head" is:inline set:html={entryScript}></script>
+  <style slot="head" is:inline>
+    html[data-startup]:not([data-startup="ready"]){overflow:hidden}
+    html[data-startup]:not([data-startup="ready"]) .console-shell{visibility:hidden;pointer-events:none}
+    html[data-startup="pending"] .boot-screen[hidden]{display:flex!important}
+  </style>
+  <div class="particle-stage" aria-hidden="true"><div class="particle-light"></div><canvas id="ambient-canvas"></canvas></div>
   <div class="console-shell" id="console-shell">
     <div class="backdrop" aria-hidden="true">
       <div class="world-image world-previous"></div><div class="world-image world-current"></div>
-      <div class="world-vignette"></div><canvas id="ambient-canvas"></canvas><div class="film-grain"></div>
+      <div class="world-vignette"></div><div class="film-grain"></div>
     </div>
     <header class="topbar">
       <a class="wordmark" href="/#profile" id="home-link">CANNON<span>个人创作空间</span></a>
@@ -24,7 +42,7 @@ const entries = [
       <div class="rail-window"><div class="rail-track" role="tablist" aria-label="作品选择" aria-orientation="horizontal">
         {entries.map((entry, index) => <div class="cover-item">
           <a class:list={['cover-button', { 'cover-profile': index === 0, 'cover-note': !entry.cover && index !== 0 }]} href={entry.href} id={`tile-${entry.id}`} role="tab" aria-selected={index === 0} aria-controls={`panel-${entry.id}`} aria-label={entry.name} tabindex={index === 0 ? 0 : -1} data-id={entry.id} data-cover={entry.cover} data-color={entry.color}>
-            {entry.cover ? <><img src={entry.cover} alt="" width="132" height="132" loading={index < 4 ? 'eager' : 'lazy'} decoding="async" /><span class="cover-word">{entry.short}</span></> : index === 0 ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
+            {entry.cover ? <><img src={entry.cover} alt="" width="132" height="132" loading="eager" decoding="async" /><span class="cover-word">{entry.short}</span></> : index === 0 ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
           </a>
           <span class="cover-name" aria-hidden="true">{entry.name}</span>
         </div>)}
@@ -61,17 +79,21 @@ const entries = [
             <div class="primary-actions"><a class="primary-button" href={projectPath(project)}>{d.category === 'notes' ? '阅读拆解' : d.category === 'art' ? '查看作品' : '进入项目'}<span aria-hidden="true">↗</span></a>{secondary && <a class="secondary-button" href={secondary.url} target="_blank" rel="noopener noreferrer">{video ? '观看演示' : '阅读文档'} ↗</a>}</div>
             <div class="resource-links">{video && document && <a href={document.url} target="_blank" rel="noopener noreferrer">策划文档 ↗</a>}{download && <a href={download.url} target="_blank" rel="noopener noreferrer">{download.kind === 'download' ? '获取试玩包' : '项目文件'} ↗</a>}</div>
           </div>
-          <aside class="context-card" aria-label="项目资料"><div class="context-art">{d.cover ? <img src={d.cover} alt="" width="480" height="298" loading="lazy" decoding="async" /> : <div class="field-note-art" aria-hidden="true">FIELD<br />NOTES</div>}<span class="context-art-label">{d.short}</span></div><div class="context-body"><span class="context-eyebrow">PROJECT FILE{d.year ? ` / ${d.year}` : ''}</span><h2>{d.tagline}</h2><dl><div><dt>我的职责</dt><dd>{d.role}</dd></div><div><dt>工具与方法</dt><dd>{d.tools.join(' / ')}</dd></div></dl></div></aside>
+          <aside class="context-card" aria-label="项目资料"><div class="context-art">{d.cover ? <img src={d.cover} alt="" width="480" height="298" loading="eager" decoding="async" /> : <div class="field-note-art" aria-hidden="true">FIELD<br />NOTES</div>}<span class="context-art-label">{d.short}</span></div><div class="context-body"><span class="context-eyebrow">PROJECT FILE{d.year ? ` / ${d.year}` : ''}</span><h2>{d.tagline}</h2><dl><div><dt>我的职责</dt><dd>{d.role}</dd></div><div><dt>工具与方法</dt><dd>{d.tools.join(' / ')}</dd></div></dl></div></aside>
         </section>;
       })}
     </main>
     <footer class="bottom-bar"><span class="edition-label">CANNON / SELECTED WORK</span><div class="control-hints"><span><kbd>←</kbd><kbd>→</kbd> 切换作品</span><span><kbd>Enter</kbd> 查看详情</span></div><span class="touch-hint">↔ 左右轻扫，探索作品</span><div class="motion-controls"><button id="toggle-motion" type="button" aria-pressed="false">暂停动效</button><button id="replay-intro" type="button">◌ 重播开场</button></div></footer>
     <p class="sr-only" id="selection-status" aria-live="polite" aria-atomic="true"></p>
   </div>
-  <section class="boot-screen" id="boot-screen" aria-label="欢迎进入个人创作空间" hidden>
-    <canvas id="boot-canvas" aria-hidden="true"></canvas><div class="boot-mist" aria-hidden="true"></div>
-    <div class="boot-brand"><span class="boot-small">WELCOME TO MY WORLD</span><h2>CANNON<span>.</span></h2><p>每一个世界，都从一个想法开始。</p><div class="boot-progress" aria-hidden="true"><span></span></div></div>
-    <span class="boot-corner">PERSONAL PORTFOLIO / 肖冠荣</span><button id="skip-intro" type="button">进入主页 <span aria-hidden="true">↵</span></button>
+  <section class="boot-screen" id="boot-screen" role="dialog" aria-modal="true" aria-labelledby="boot-title" tabindex="-1" hidden>
+    <div class="boot-brand"><span class="boot-small">PERSONAL CREATIVE SPACE</span><h2 id="boot-title">CANNON<span>.</span></h2>
+      <p id="boot-status" role="status" aria-live="polite">正在加载作品…</p>
+      <div class="boot-progress" id="boot-progress" role="progressbar" aria-label="图片加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+      <span class="boot-detail" id="boot-detail">准备进入创作空间</span>
+      <button id="retry-loading" type="button" hidden>重新加载</button>
+    </div>
+    <span class="boot-corner">PERSONAL PORTFOLIO / 肖冠荣</span><button id="skip-intro" type="button" hidden>先进入主页 <span aria-hidden="true">↵</span></button>
   </section>
   <noscript><p class="no-js-note">可以直接点击封面查看作品，或<a href="/works/">打开全部作品</a>。</p></noscript>
   <script>import '../scripts/console';</script>

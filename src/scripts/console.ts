@@ -1,4 +1,5 @@
-import { createPortfolioDust } from './particles.js';
+import { createPortfolioDust } from './particles';
+import { prepareImages } from './image-readiness';
 import { WheelNavigator, wheelIntent } from './wheel-navigation';
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -16,10 +17,12 @@ const front = document.querySelector<HTMLElement>('.world-current')!;
 const back = document.querySelector<HTMLElement>('.world-previous')!;
 let current = 0;
 let paused = false;
-let bootVisible = false;
+const root = document.documentElement;
+let bootVisible = root.dataset.startup === 'pending';
+let introMode: 'loading' | 'error' | 'replay' | 'none' = bootVisible ? 'loading' : 'none';
+let readinessGeneration = 0;
 let bootTimer: ReturnType<typeof setTimeout>;
 let hideTimer: ReturnType<typeof setTimeout>;
-let bootFadeUntil = 0;
 let backgroundGeneration = 0;
 let backgroundAnimations: Animation[] = [];
 let copyAnimation: Animation | undefined;
@@ -90,6 +93,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   void setBackground(selected.dataset.cover || '');
   if (updateHash) history.replaceState(null, '', `#${selected.dataset.id}`);
   if (focus) selected.focus({ preventScroll: true });
+  resumePaint();
 }
 
 tabs.forEach((tab, index) => tab.addEventListener('click', event => {
@@ -119,8 +123,14 @@ shell.addEventListener('wheel', event => {
 document.addEventListener('keydown', event => {
   if (event.ctrlKey || event.metaKey || event.altKey || (event.target as Element).closest('input,textarea,select,[contenteditable="true"]')) return;
   if (bootVisible) {
-    if (event.key === 'Enter' || event.key === 'Escape') { event.preventDefault(); endIntro(); }
-    if (event.key === 'Tab') { event.preventDefault(); byId('skip-intro').focus(); }
+    if (introMode === 'replay' && ['Enter', 'Escape'].includes(event.key)) { event.preventDefault(); endIntro(); }
+    if (event.key === 'Tab') {
+      const controls = [...boot.querySelectorAll<HTMLButtonElement>('button')].filter(button => !button.hidden && !button.disabled);
+      event.preventDefault();
+      const active = controls.indexOf(document.activeElement as HTMLButtonElement);
+      const next = (active + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+      (controls[next] || boot).focus();
+    }
     return;
   }
   if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -154,52 +164,113 @@ shell.addEventListener('touchend', event => {
 shell.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
 shell.addEventListener('click', event => { if (performance.now() < ignoreClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); } }, true);
 
-const ambientDust = createPortfolioDust(byId<HTMLCanvasElement>('ambient-canvas'), 97);
-const bootDust = createPortfolioDust(byId<HTMLCanvasElement>('boot-canvas'), 97);
+const ambientDust = createPortfolioDust(byId<HTMLCanvasElement>('ambient-canvas'));
+const wantsParticles = () => bootVisible || current === 0;
 function paint(now: number) {
-  const dt = lastFrame ? Math.min(now - lastFrame, 50) : 16.67;
-  lastFrame = now; motionTime += dt;
-  // The full-screen intro obscures the ambient layer, so render only one particle field.
-  if (!bootVisible) ambientDust.draw(motionTime, true, motionOff());
-  if (bootVisible || now < bootFadeUntil) bootDust.draw(motionTime, false, motionOff());
-  if (!motionOff() && !document.hidden) frame = requestAnimationFrame(paint);
+  frame = 0;
+  if (document.hidden || !wantsParticles()) return;
+  const dt = lastFrame ? now - lastFrame : 16.67;
+  if (!lastFrame || dt >= ambientDust.interval() - 1 || motionOff()) {
+    lastFrame = now;
+    motionTime += Math.min(dt, 80);
+    ambientDust.draw(motionTime, motionOff(), dt);
+  }
+  if (!motionOff()) frame = requestAnimationFrame(paint);
 }
-function resumePaint() { cancelAnimationFrame(frame); lastFrame = 0; if (!document.hidden) frame = requestAnimationFrame(paint); }
+function resumePaint() {
+  cancelAnimationFrame(frame); lastFrame = 0;
+  const visible = wantsParticles();
+  document.body.dataset.particles = visible ? 'on' : 'off';
+  if (visible && !document.hidden) frame = requestAnimationFrame(paint);
+}
 
 function endIntro(immediate = false) {
   clearTimeout(bootTimer); clearTimeout(hideTimer);
   const focusWasInside = boot.contains(document.activeElement);
-  bootVisible = false; bootFadeUntil = immediate || motionOff() ? 0 : performance.now() + 1100;
+  bootVisible = false; introMode = 'none'; root.dataset.startup = 'ready';
   boot.classList.add('is-hidden'); boot.inert = true; shell.inert = false;
+  shell.removeAttribute('aria-busy');
   if (immediate || motionOff()) boot.hidden = true;
-  else hideTimer = setTimeout(() => { boot.hidden = true; }, 1100);
-  try { sessionStorage.setItem('cannon-intro-v1', 'seen'); } catch { /* Optional preference only. */ }
+  else hideTimer = setTimeout(() => { boot.hidden = true; }, 480);
   if (focusWasInside) tabs[current].focus({ preventScroll: true });
+  resumePaint();
+}
+function showBoot(mode: 'loading' | 'replay') {
+  clearTimeout(bootTimer); clearTimeout(hideTimer); wheel.reset();
+  introMode = mode; bootVisible = true; root.dataset.startup = mode;
+  boot.hidden = false; boot.classList.remove('is-hidden'); boot.inert = false; shell.inert = true;
+  byId('retry-loading').hidden = true;
+  byId('skip-intro').hidden = mode === 'loading';
+  byId('boot-progress').hidden = mode === 'replay';
+  byId('skip-intro').textContent = mode === 'replay' ? '进入主页 ↵' : '先进入主页 ↵';
+  boot.focus({ preventScroll: true });
   resumePaint();
 }
 function startIntro() {
   if (motionOff()) return;
-  wheel.reset();
-  clearTimeout(bootTimer); clearTimeout(hideTimer);
-  boot.hidden = false; boot.classList.remove('is-hidden'); boot.inert = false; shell.inert = true; bootVisible = true;
-  bootDust.resize();
-  for (const element of boot.querySelectorAll<HTMLElement>('.boot-brand,.boot-progress span')) {
-    element.style.animation = 'none'; void element.offsetWidth; element.style.animation = '';
-  }
-  byId('skip-intro').focus({ preventScroll: true });
-  bootTimer = setTimeout(() => endIntro(), 3800);
-  resumePaint();
+  showBoot('replay');
+  byId('boot-status').textContent = '每一个世界，都从一个想法开始。';
+  byId('boot-detail').textContent = 'WELCOME TO MY WORLD';
+  bootTimer = setTimeout(() => endIntro(), 3000);
 }
+const homeImages = [...shell.querySelectorAll<HTMLImageElement>('img')];
+const imageGroups = new Map<string, HTMLImageElement[]>();
+for (const image of homeImages) {
+  image.loading = 'eager';
+  const url = image.getAttribute('src')!;
+  imageGroups.set(url, [...(imageGroups.get(url) || []), image]);
+  image.addEventListener('load', () => { delete image.dataset.unavailable; });
+}
+async function prepareHome(showLoading: boolean) {
+  const generation = ++readinessGeneration;
+  const started = performance.now();
+  if (showLoading) { showBoot('loading'); shell.setAttribute('aria-busy', 'true'); }
+  const result = await prepareImages([...imageGroups.keys()], {
+    load: async url => {
+      const images = imageGroups.get(url)!;
+      // Reassign only failed images to allow the retry button to request them again.
+      for (const image of images) if (image.complete && !image.naturalWidth) image.src = url;
+      await Promise.all(images.map(image => image.decode()));
+    },
+    onProgress: ({ ready, total }) => {
+      if (generation !== readinessGeneration || !showLoading) return;
+      byId('boot-status').textContent = '正在加载作品…';
+      byId('boot-detail').textContent = `已准备 ${ready} / ${total}`;
+      byId('boot-progress').setAttribute('aria-valuenow', String(total ? Math.round(ready / total * 100) : 100));
+      byId('boot-progress').style.setProperty('--load-progress', String(total ? ready / total : 1));
+    },
+  });
+  if (generation !== readinessGeneration) return;
+  if (result.failed.length) {
+    for (const url of result.failed) for (const image of imageGroups.get(url)!) image.dataset.unavailable = 'true';
+    if (!showLoading) return;
+    introMode = 'error'; root.dataset.startup = 'error';
+    byId('boot-status').textContent = '有几张图片暂时未能加载';
+    byId('boot-detail').textContent = '可以重试，或先进入主页浏览。';
+    byId('retry-loading').hidden = false;
+    byId('skip-intro').hidden = false;
+    byId('retry-loading').focus({ preventScroll: true });
+    return;
+  }
+  for (const image of homeImages) delete image.dataset.unavailable;
+  try { sessionStorage.setItem('cannon-ready-v2', root.dataset.assetKey!); } catch { /* Internal navigation also skips startup. */ }
+  if (showLoading) {
+    const remaining = motionOff() ? 0 : Math.max(0, 600 - (performance.now() - started));
+    bootTimer = setTimeout(() => { if (generation === readinessGeneration) endIntro(); }, remaining);
+  }
+}
+byId('retry-loading').addEventListener('click', () => { void prepareHome(true); });
+
 function updateMotion() {
   document.body.dataset.motion = motionOff() ? 'paused' : 'playing';
   motionButton.setAttribute('aria-pressed', String(motionOff()));
   motionButton.textContent = reduced.matches ? '已减少动态效果' : paused ? '开启动效' : '暂停动效';
   motionButton.disabled = reduced.matches;
   replayButton.disabled = motionOff();
-  if (motionOff()) { copyAnimation?.cancel(); backgroundAnimations.forEach(animation => animation.finish()); endIntro(true); }
+  if (motionOff()) { copyAnimation?.cancel(); backgroundAnimations.forEach(animation => animation.finish()); if (introMode === 'replay') endIntro(true); }
   resumePaint();
 }
-byId('skip-intro').addEventListener('click', () => endIntro());
+byId('skip-intro').addEventListener('click', () => { if (introMode !== 'loading') endIntro(); });
 replayButton.addEventListener('click', startIntro);
 motionButton.addEventListener('click', () => {
   paused = !paused;
@@ -208,13 +279,18 @@ motionButton.addEventListener('click', () => {
 });
 reduced.addEventListener('change', updateMotion);
 document.addEventListener('visibilitychange', () => { wheel.reset(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
-window.addEventListener('resize', () => { positionRail(); ambientDust.resize(); bootDust.resize(); resumePaint(); });
-window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); endIntro(true); } });
-window.addEventListener('pagehide', () => { cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
+window.addEventListener('resize', () => { positionRail(); ambientDust.resize(); resumePaint(); });
+// Moving between monitors / browser zoom can change DPR without a layout resize.
+function watchPixelRatio() {
+  const density = matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+  density.addEventListener('change', () => { ambientDust.resize(); resumePaint(); watchPixelRatio(); }, { once: true });
+}
+watchPixelRatio();
+window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); if (bootVisible && introMode !== 'replay') void prepareHome(true); else endIntro(true); } });
+window.addEventListener('pagehide', () => { readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
 
 const initial = tabs.findIndex(tab => `#${tab.dataset.id}` === location.hash);
 select(initial >= 0 ? initial : 0, false, initial < 0);
-let seen = false;
-try { seen = sessionStorage.getItem('cannon-intro-v1') === 'seen'; } catch { /* Intro still remains skippable. */ }
 updateMotion();
-if (!seen && initial < 0 && !motionOff()) startIntro(); else endIntro(true);
+if (bootVisible) void prepareHome(true);
+else { endIntro(true); void prepareHome(false); }
