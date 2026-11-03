@@ -5,7 +5,7 @@ import Footer from '../../components/Footer.astro';
 import { getProjects, categories, projectPath } from '../../lib/content';
 const projects = await getProjects();
 ---
-<Base title="作品库" page="collection-page">
+<Base title="作品集" page="collection-page">
   <Header active="works" />
   <main id="main-content" class="page-main">
     <div class="page-intro"><p class="eyebrow">THE LIBRARY / {String(projects.length).padStart(2, '0')} PROJECTS</p><h1>想法的可玩形态<span>。</span></h1><p>关卡、游戏原型、视觉实验与设计思考。<br />每一个作品，都是一次关于体验的探索。</p><a class="text-link" href="/">← 回到主机视图</a></div>

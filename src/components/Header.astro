@@ -1,12 +1,19 @@
 ---
 import profile from '../data/profile.json';
-const { active = '' } = Astro.props;
+import '../styles/navigation.css';
+interface Props { active?: 'home' | 'works' | 'about' | ''; console?: boolean; }
+const { active = '', console: onConsole = false } = Astro.props;
 ---
-<header class="page-header">
-  <a class="wordmark" href="/" aria-label="CANNON，返回主页">CANNON<span>个人创作空间</span></a>
-  <nav aria-label="主导航">
-    <a href="/works/" aria-current={active === 'works' ? 'page' : undefined}>作品库</a>
-    <a href="/about/" aria-current={active === 'about' ? 'page' : undefined}>关于我</a>
-    <a href={`mailto:${profile.email}`}>联系 <span aria-hidden="true">↗</span></a>
+<header class:list={['site-header', { 'console-header': onConsole }]}>
+  <nav class="section-nav" aria-label="主导航">
+    <a id={onConsole ? 'home-link' : undefined} href={onConsole ? '/#profile' : '/'} aria-current={active === 'home' ? 'page' : undefined}>个人主页</a>
+    <a href="/works/" aria-current={active === 'works' ? 'page' : undefined}>作品集</a>
   </nav>
+  <div class="header-right">
+    <nav class="utility-nav" aria-label="个人信息">
+      <a href="/about/" aria-current={active === 'about' ? 'page' : undefined}>关于我</a>
+      <a href={`mailto:${profile.email}`}>联系</a>
+    </nav>
+    <a class="header-profile" href="/about/"><span class="header-avatar" aria-hidden="true">C</span><span>{profile.name}</span></a>
+  </div>
 </header>

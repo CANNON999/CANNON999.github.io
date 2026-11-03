@@ -1,0 +1,39 @@
+---
+import { categories, projectPath, type Project } from '../lib/content';
+import { hubResources } from '../lib/project-hub';
+import WidgetIcon from './WidgetIcon.astro';
+import '../styles/project-hub.css';
+const { project, embedded = false } = Astro.props as { project: Project; embedded?: boolean };
+const d = project.data;
+const { primary, groups } = hubResources(d.resources, project.id);
+const external = primary.url.startsWith('https:');
+const Heading = embedded ? 'h2' : 'h1';
+---
+<section class:list={['project-hub', { 'hub-embedded': embedded }]} data-hub-id={project.id} hidden={embedded} aria-labelledby={`hub-title-${project.id}`} style={d.cover ? `--hub-cover:url("${d.cover}")` : undefined}>
+  <div class:list={['hub-art', { 'notes-background': !d.cover }]} aria-hidden="true"></div>
+  <div class="hub-shade" aria-hidden="true"></div>
+  <header class="hub-topbar">
+    <div class="hub-identity"><span class="hub-mini-cover" aria-hidden="true">{!d.cover && 'N'}</span><span class="hub-category">{categories[d.category].label}</span><span class="hub-name">{d.title}</span></div>
+    <nav class="hub-navigation" aria-label="作品导航">
+      <a href={`/#${project.id}`} data-close-hub={embedded ? '' : undefined}>← 返回作品选择</a>
+      <a href="/works/">作品集</a>
+    </nav>
+  </header>
+  <div class="hub-content">
+    <div class="hub-feature">
+      <div class="hub-title-block"><p class="hub-eyebrow">{d.english}</p><Heading id={`hub-title-${project.id}`}>{d.title}</Heading><p class="hub-tagline">{d.tagline}</p></div>
+      <div class="hub-action-row">
+        <div class="hub-actions"><a class="hub-primary" href={primary.url} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>{external ? primary.kind === 'document' ? '阅读设计文档' : primary.kind === 'download' ? '获取试玩包' : primary.kind === 'video' ? '观看演示' : '获取项目文件' : primary.label}<span aria-hidden="true">↗</span></a><a class="hub-more" href={`${projectPath(project)}#project-story`} aria-label={`了解${d.title}的项目详情`}>···</a></div>
+        <div class="hub-facts"><span>{d.tools[0]}</span>{d.year && <span>{d.year}</span>}<span>{d.role}</span></div>
+      </div>
+    </div>
+    <div class="hub-resource-grid" aria-label="作品资源">
+      {groups.map((group, i) => <section class:list={['hub-resource-card', { 'is-placeholder': !group.resources.length }]} data-resource-kind={group.id} style={`--card-order:${i}`} aria-label={group.title}>
+        <div class="hub-card-top"><WidgetIcon name={group.icon} /><span>{group.english}</span><small>{group.resources.length ? `${String(group.resources.length).padStart(2, '0')}` : '待补充'}</small></div>
+        <h3>{group.title}</h3>
+        {group.resources.length ? <div class="hub-resource-links">{group.resources.map(resource => <a href={resource.url} target="_blank" rel="noopener noreferrer"><span>{resource.label}{resource.code && <small>提取码 {resource.code}</small>}</span><span aria-hidden="true">↗</span></a>)}</div> : <p class="hub-empty">{group.id === 'document' ? '项目文档入口' : group.id === 'video' ? '项目演示与过程记录' : '试玩包体与项目文件'}<span>内容待补充</span></p>}
+      </section>)}
+    </div>
+    <footer class="hub-footer"><span>CANNON / PROJECT COLLECTION</span><a href={`${projectPath(project)}#project-story`}>项目介绍与创作过程 <span aria-hidden="true">↓</span></a>{embedded && <span class="hub-key-hint"><kbd>Esc</kbd> 返回</span>}</footer>
+  </div>
+</section>

@@ -59,9 +59,25 @@ if ([...home.matchAll(/<canvas\b/g)].length !== 1 || !home.includes('id="ambient
 const head = home.slice(0, home.indexOf('</head>'));
 if (!head.includes('cannon-ready-v2') || !head.includes('visibility:hidden')) failures.push('First-paint readiness gate must be in the document head.');
 if (!home.includes('id="retry-loading"') || !home.includes('id="skip-intro"')) failures.push('Image failures must provide recovery controls.');
+const mainNav = html => /<nav\b[^>]*class="section-nav"[^>]*>([\s\S]*?)<\/nav>/.exec(html)?.[1] || '';
+const homeNav = mainNav(home);
+const collection = await readFile(resolve(root, 'works/index.html'), 'utf8');
+if (!homeNav.includes('个人主页') || !homeNav.includes('作品集') || [...homeNav.matchAll(/<a\b/g)].length !== 2) failures.push('Primary navigation must contain exactly the home and portfolio tabs.');
+if (!/<a[^>]*aria-current="page"[^>]*>个人主页<\/a>/.test(homeNav) || !/<a[^>]*aria-current="page"[^>]*>作品集<\/a>/.test(mainNav(collection))) failures.push('Primary navigation must indicate the active section.');
+const widgets = [...home.matchAll(/data-widget="([^"]+)"/g)].map(match => match[1]);
+if (widgets.join(',') !== 'profile,education,tools,projects,internship,interests') failures.push('Welcome must contain exactly the six agreed widgets.');
+if (home.includes('class="cover-word"') || [...home.matchAll(/class="cover-name"/g)].length !== tabCount) failures.push('Remove cover captions while preserving the expanded title.');
+const embeddedHubs = [...home.matchAll(/data-hub-id="([^"]+)"/g)].map(match => match[1]);
+if (embeddedHubs.length !== tabCount - 1 || new Set(embeddedHubs).size !== embeddedHubs.length) failures.push('Every project must have exactly one ready-to-open hub.');
+for (const id of embeddedHubs) {
+  const detail = await readFile(resolve(root, `works/${id}/index.html`), 'utf8');
+  if (!detail.includes(`data-hub-id="${id}"`) || !detail.includes('id="project-story"')) failures.push(`${id}: standalone hub and original project story must exist.`);
+  for (const kind of ['document', 'video', 'download']) if (!detail.includes(`data-resource-kind="${kind}"`)) failures.push(`${id}: missing ${kind} resource card.`);
+  if (/<a\b[^>]*href="#"/.test(detail)) failures.push(`${id}: placeholders must not be dead links.`);
+}
 const sitemap = await readFile(resolve(root, 'sitemap.xml'), 'utf8');
 if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push('Missing project sitemap route.');
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;
-} else console.log(`Verified ${pages.length} HTML pages, ${links} local references, ${tabCount} matching tabs/panels, and sitemap.`);
+} else console.log(`Verified ${pages.length} HTML pages, ${links} local references, ${tabCount} matching tabs/panels, 6 welcome widgets, ${embeddedHubs.length} project hubs, navigation, and sitemap.`);

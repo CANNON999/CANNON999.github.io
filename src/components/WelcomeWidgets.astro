@@ -1,0 +1,41 @@
+---
+import profile from '../data/profile.json';
+import WidgetIcon from './WidgetIcon.astro';
+import type { Project } from '../lib/content';
+import '../styles/welcome.css';
+const { projects } = Astro.props as { projects: Project[] };
+const featured = projects.filter(p => p.data.category === 'level' || p.data.category === 'game').slice(0, 2);
+---
+<div class="welcome-widgets" aria-label="个人介绍，六个小组件" data-static-widgets>
+  <article class="welcome-widget widget-profile" data-widget="profile">
+    <div class="widget-heading"><WidgetIcon name="person" /><h2>个人档案</h2><span class="widget-status" aria-label="创作者"></span></div>
+    <div class="widget-identity"><span class="widget-avatar" aria-hidden="true">C</span><div><h1>{profile.name}</h1><p>CANNON / xxXXxx</p></div></div>
+    <p class="widget-description">{profile.title}。<br />从关卡、原型到视觉，把想法变成可以走进去的世界。</p>
+    <div class="widget-chips">{profile.tags.map(tag => <span>{tag}</span>)}</div>
+    <a class="widget-link" href="/about/">查看个人档案 <span aria-hidden="true">↗</span></a>
+  </article>
+  <article class="welcome-widget widget-education" data-widget="education">
+    <div class="widget-heading"><WidgetIcon name="school" /><h2>教育背景</h2></div>
+    <p class="widget-value">{profile.education.school}<span>{profile.education.period}</span></p>
+    <p class="widget-detail">{profile.education.department}</p>
+  </article>
+  <article class="welcome-widget widget-tools" data-widget="tools">
+    <div class="widget-heading"><WidgetIcon name="tools" /><h2>创作工具</h2></div>
+    <div class="tool-list">{profile.tools.map((tool, i) => <span><b aria-hidden="true">{['U', 'B', 'C⁺', 'X'][i]}</b>{tool}</span>)}</div>
+  </article>
+  <article class="welcome-widget widget-projects" data-widget="projects">
+    <div class="widget-heading"><WidgetIcon name="work" /><h2>项目经历</h2><span class="widget-count">{String(projects.length).padStart(2, '0')}</span></div>
+    <p class="widget-description">从设计图纸，到可游玩的空间。</p>
+    <div class="widget-project-list">{featured.map(p => <a href={`/works/${p.id}/`} data-open-hub={p.id}><span class="project-dot" style={`--project-color:${p.data.color}`}></span><span><strong>{p.data.title}</strong><small>{p.data.role}</small></span><span aria-hidden="true">↗</span></a>)}</div>
+    <a class="widget-link" href="/works/">浏览作品集 <span aria-hidden="true">↗</span></a>
+  </article>
+  <article class="welcome-widget widget-internship" data-widget="internship">
+    <div class="widget-heading"><WidgetIcon name="work" /><h2>实习经历</h2><span class="widget-placeholder">待补充</span></div>
+    <p class="widget-detail">公司 · 职位 · 参与的项目</p>
+  </article>
+  <article class="welcome-widget widget-interests" data-widget="interests">
+    <div class="widget-heading"><WidgetIcon name="game" /><h2>游戏与日常</h2></div>
+    <WidgetIcon name="game" class="interest-gamepad" />
+    <div class="interest-copy"><p class="widget-value">热爱游戏，也热爱创造。</p><p class="widget-description">以玩家的视角，探索世界。<br />以创作者的视角，思考体验。</p><div class="widget-chips">{profile.interests.map(interest => <span>{interest}</span>)}</div></div>
+  </article>
+</div>

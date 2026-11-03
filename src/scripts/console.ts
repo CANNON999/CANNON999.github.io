@@ -1,6 +1,8 @@
 import { createPortfolioDust } from './particles';
 import { prepareImages } from './image-readiness';
 import { WheelNavigator, wheelIntent } from './wheel-navigation';
+import { createProjectHub } from './project-hub';
+import { canOpenHub, consoleRoute } from '../lib/project-hub';
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = byId('console-shell');
@@ -32,6 +34,12 @@ let motionTime = 0;
 try { paused = localStorage.getItem('cannon-motion') === 'paused'; } catch { /* Storage can be unavailable in private contexts. */ }
 const motionOff = () => paused || reduced.matches;
 const wheel = new WheelNavigator();
+const hub = createProjectHub({
+  select: id => { const index = tabs.findIndex(tab => tab.dataset.id === id); select(index >= 0 ? index : 0, false, false); },
+  restoreFocus: () => tabs[current].focus({ preventScroll: true }),
+  motionOff,
+  isLoading: () => bootVisible,
+});
 
 function positionRail() {
   const css = getComputedStyle(document.documentElement);
@@ -59,6 +67,7 @@ async function setBackground(cover: string) {
   back.style.backgroundImage = old;
   back.style.opacity = old && old !== 'none' ? '.83' : '0';
   front.style.backgroundImage = cover ? `url("${cover}")` : 'none';
+  front.dataset.cover = cover;
   front.style.opacity = cover ? '.83' : '0';
   if (!motionOff()) {
     backgroundAnimations = [
@@ -88,26 +97,27 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   positionRail();
   if (changed) {
     copyAnimation?.cancel();
-    if (!motionOff()) copyAnimation = panels[current].querySelector('.project-copy')!.animate([{ opacity: .25, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    const copy = panels[current].querySelector('.project-copy, .welcome-widgets');
+    if (!motionOff() && copy) copyAnimation = copy.animate([{ opacity: .25, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
   }
-  void setBackground(selected.dataset.cover || '');
+  if (changed || front.dataset.cover !== (selected.dataset.cover || '')) void setBackground(selected.dataset.cover || '');
   if (updateHash) history.replaceState(null, '', `#${selected.dataset.id}`);
   if (focus) selected.focus({ preventScroll: true });
   resumePaint();
 }
 
 tabs.forEach((tab, index) => tab.addEventListener('click', event => {
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  event.preventDefault(); select(index);
+  if (!canOpenHub(event) || bootVisible) return;
+  event.preventDefault();
+  if (index === 0) select(0); else hub.open(tab.dataset.id!);
 }));
 previousButton.addEventListener('click', () => select(current - 1));
 nextButton.addEventListener('click', () => select(current + 1));
-byId('explore-work').addEventListener('click', event => { event.preventDefault(); select(1, true); });
-byId('home-link').addEventListener('click', event => { event.preventDefault(); select(0); });
-window.addEventListener('hashchange', () => { const index = tabs.findIndex(tab => `#${tab.dataset.id}` === location.hash); if (index >= 0) select(index, false, false); });
+byId('home-link').addEventListener('click', event => { if (canOpenHub(event)) { event.preventDefault(); select(0); } });
 
 // Keep gesture recognition independent from CSS/scene animation completion.
 shell.addEventListener('wheel', event => {
+  if (hub.isOpen() || (event.target as Element).closest('[data-static-widgets]')) return;
   const delta = wheelIntent(event, {
     intro: bootVisible,
     overflowing: shell.scrollHeight > innerHeight + 2,
@@ -121,6 +131,7 @@ shell.addEventListener('wheel', event => {
 }, { passive: false });
 
 document.addEventListener('keydown', event => {
+  if (hub.isOpen()) return;
   if (event.ctrlKey || event.metaKey || event.altKey || (event.target as Element).closest('input,textarea,select,[contenteditable="true"]')) return;
   if (bootVisible) {
     if (introMode === 'replay' && ['Enter', 'Escape'].includes(event.key)) { event.preventDefault(); endIntro(); }
@@ -134,19 +145,21 @@ document.addEventListener('keydown', event => {
     return;
   }
   if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+    if ((event.target as Element).closest('[data-static-widgets]')) return;
     if (shell.scrollHeight > innerHeight + 2 && !rail.contains(event.target as Node) && ['ArrowUp', 'ArrowDown'].includes(event.key)) return;
     event.preventDefault(); select(current + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1), true);
   } else if (event.key === 'Home' || event.key === 'End') {
     if (!rail.contains(event.target as Node)) return;
     event.preventDefault(); select(event.key === 'Home' ? 0 : tabs.length - 1, true);
   } else if (event.key === 'Enter' && (!(event.target as Element).closest('a,button') || rail.contains(event.target as Node))) {
-    event.preventDefault(); location.assign(tabs[current].href);
+    event.preventDefault();
+    if (current === 0) location.assign(tabs[current].href); else hub.open(tabs[current].dataset.id!);
   }
 });
 
 let touchStart: { x: number; y: number } | null = null;
 let ignoreClickUntil = 0;
-shell.addEventListener('touchstart', event => { touchStart = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null; }, { passive: true });
+shell.addEventListener('touchstart', event => { touchStart = event.touches.length === 1 && !(event.target as Element).closest('[data-static-widgets]') && !hub.isOpen() ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null; }, { passive: true });
 shell.addEventListener('touchmove', event => {
   if (!touchStart || event.touches.length !== 1 || bootVisible) return;
   const dx = event.touches[0].clientX - touchStart.x;
@@ -194,6 +207,7 @@ function endIntro(immediate = false) {
   else hideTimer = setTimeout(() => { boot.hidden = true; }, 480);
   if (focusWasInside) tabs[current].focus({ preventScroll: true });
   resumePaint();
+  hub.syncRoute();
 }
 function showBoot(mode: 'loading' | 'replay') {
   clearTimeout(bootTimer); clearTimeout(hideTimer); wheel.reset();
@@ -298,8 +312,9 @@ watchPixelRatio();
 window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); if (bootVisible && introMode !== 'replay') void prepareHome(true); else endIntro(true); } });
 window.addEventListener('pagehide', () => { readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
 
-const initial = tabs.findIndex(tab => `#${tab.dataset.id}` === location.hash);
-select(initial >= 0 ? initial : 0, false, initial < 0);
+const route = consoleRoute(location.hash, tabs.slice(1).map(tab => tab.dataset.id!));
+const initial = tabs.findIndex(tab => tab.dataset.id === route.selected);
+select(initial >= 0 ? initial : 0, false, !location.hash);
 updateMotion();
 if (bootVisible) void prepareHome(true);
 else { endIntro(true); void prepareHome(false); }

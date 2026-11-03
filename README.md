@@ -39,6 +39,7 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.2.0 测试报告](docs/test-results/2026-11-03-v1.2.0.md)：六组件、双导航、作品 Hub 与连续转场的实际验证。
 - [V1.1.0 测试报告](docs/test-results/2026-11-03-v1.1.0.md)：粒子背景、首次加载和相关回归的实际结果与边界。
 - [V1.0.1 测试报告](docs/test-results/2026-10-30-v1.0.1.md)：此前触控板修复与用户验收记录。
 
@@ -51,6 +52,9 @@ pnpm verify
 | 姓名、邮箱、简介、学校与工具 | `src/data/profile.json` |
 | 单个作品的标题、简介、资源链接与正文 | `src/content/projects/对应作品.md` |
 | 作品封面和正文图片 | `public/images/` |
+| 个人介绍六组件内容与样式 | `src/components/WelcomeWidgets.astro`、`src/styles/welcome.css`（资料读取 profile.json） |
+| 主导航和右侧个人入口 | `src/components/Header.astro`、`src/styles/navigation.css` |
+| 作品 Hub、资源分组和转场 | `src/components/ProjectHub.astro`、`src/lib/project-hub.ts`、`src/scripts/project-hub.ts`、`src/styles/project-hub.css` |
 | 主机界面布局与响应式样式 | `src/styles/console.css` |
 | 作品列表、详情、个人档案样式 | `src/styles/global.css` |
 | 滚轮、键盘、开场、动效偏好 | `src/scripts/console.ts` |
@@ -106,7 +110,7 @@ legacy: []
 - 文件名会成为作品地址，如 `/works/my-new-level/`；发布后尽量保持文件名稳定。
 - 正文图片写法：`![图片说明](/images/my-new-level.webp)`。
 
-新增内容会自动出现在主页横向栏、作品库、独立详情页和 sitemap 中，无需修改页面代码。未发布的草稿不会生成详情页。
+新增内容会自动出现在主页横向栏、作品集、首页展开 Hub、独立详情页和 sitemap 中，无需修改页面代码。未发布的草稿不会生成详情页。
 
 ## 发布到 GitHub Pages
 
@@ -143,7 +147,9 @@ GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度�
 
 - 首次进入先显示动态粒子和加载提示，首页图片完成解码后连续进入个人介绍；同标签页、站内返回及作品切换不强制重播。图片失败或超过 12 秒时可重试或主动进入；迟到的图片全部解码后仍会自动进入。手动重播可立即跳过。
 - 滚轮向下/右选择下一项，向上/左选择上一项；普通轻扫一项，连续新手势可在惯性尾部和动画中响应；持续稳定推移可以继续浏览，衰减惯性不连跳。
-- 点击封面选择作品，方向键切换；封面获焦时 Home/End 跳到首尾，Enter 打开详情。
+- 单击作品封面直接在当前页面展开 Game Hub；滚轮/方向键先预览，Enter 展开；Home/End 跳首尾。Escape、返回按钮或浏览器后退回到原作品，前进可再次展开。独立 `/works/id/` 保持可分享、无脚本可用。
+- 个人介绍固定六个组件：桌面三列、手机两列，没有隐藏分页。组件上的滚轮不切换作品。实习经历暂待补充；资料仍以真实 profile.json 为准。
+- Hub 的文档、视频、下载卡片自动读取作品 resources；有多个视频/工程包会全部保留，缺资源只显示待补充。主要按钮优先文档，无资源则前往本站作品介绍。
 - 手机支持横向手势；短屏或放大页面可以正常纵向滚动，详情页始终按常规方式阅读。
 - 粒子画布匹配显示器实际 DPR；性能不足时减少数量和更新频率，不降低画布分辨率。支持系统“减少动态效果”和手动暂停；作品画面及页面隐藏时停止粒子帧循环。
 - 没有 JavaScript 时仍可通过封面链接、作品库和详情页访问内容。
