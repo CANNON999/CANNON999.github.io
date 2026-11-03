@@ -9,7 +9,7 @@ const featured = projects.filter(p => p.data.category === 'level' || p.data.cate
 <div class="welcome-widgets" aria-label="个人介绍，六个小组件" data-static-widgets>
   <article class="welcome-widget widget-profile" data-widget="profile">
     <div class="widget-heading"><WidgetIcon name="person" /><h2>个人档案</h2><span class="widget-status" aria-label="创作者"></span></div>
-    <div class="widget-identity"><span class="widget-avatar" aria-hidden="true">C</span><div><h1>{profile.name}</h1><p>CANNON / xxXXxx</p></div></div>
+    <div class="widget-identity"><img class="widget-avatar" src={profile.avatar} width="100" height="100" alt="" loading="eager" decoding="async" /><div><h1>{profile.name}</h1><p>CANNON / xxXXxx</p></div></div>
     <p class="widget-description">{profile.title}。<br />从关卡、原型到视觉，把想法变成可以走进去的世界。</p>
     <div class="widget-chips">{profile.tags.map(tag => <span>{tag}</span>)}</div>
     <a class="widget-link" href="/about/">查看个人档案 <span aria-hidden="true">↗</span></a>

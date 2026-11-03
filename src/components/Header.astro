@@ -14,6 +14,6 @@ const { active = '', console: onConsole = false } = Astro.props;
       <a href="/about/" aria-current={active === 'about' ? 'page' : undefined}>关于我</a>
       <a href={`mailto:${profile.email}`}>联系</a>
     </nav>
-    <a class="header-profile" href="/about/"><span class="header-avatar" aria-hidden="true">C</span><span>{profile.name}</span></a>
+    <a class="header-profile" href="/about/"><img class="header-avatar" src={profile.avatar} width="60" height="60" alt="" loading="eager" decoding="async" /><span>{profile.name}</span></a>
   </div>
 </header>

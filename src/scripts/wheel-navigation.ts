@@ -32,8 +32,6 @@ export class WheelNavigator {
   private falling = false;
   private trough = Infinity;
   private attack: { base: number; peak: number; distance: number; samples: number } | null = null;
-  private steadySince = 0;
-  private steadyDistance = 0;
 
   reset() {
     this.lastTime = this.lastStep = -Infinity;
@@ -41,7 +39,6 @@ export class WheelNavigator {
     this.consumed = this.falling = false;
     this.trough = Infinity;
     this.attack = null;
-    this.steadySince = this.steadyDistance = 0;
   }
 
   push(delta: number, now: number, discrete = false): number {
@@ -66,8 +63,6 @@ export class WheelNavigator {
       this.falling = false;
       this.trough = magnitude;
       this.attack = null;
-      this.steadySince = now;
-      this.steadyDistance = 0;
       return direction;
     };
     if (!this.consumed) {
@@ -94,14 +89,7 @@ export class WheelNavigator {
       this.attack = { base: this.trough, peak: magnitude, distance: magnitude, samples: 1 };
     }
 
-    // A deliberately sustained drag may keep browsing; a decaying tail may not.
-    if (magnitude >= 8 && magnitude >= previous * .98 && magnitude <= previous * 1.1) {
-      if (!this.steadyDistance) this.steadySince = now;
-      this.steadyDistance += magnitude;
-      if (now - this.lastStep >= 220 && now - this.steadySince >= 80 && this.steadyDistance >= 80) return step();
-    } else {
-      this.steadyDistance = 0;
-    }
+    // Holding one touchpad drag must not become automatic repeat navigation.
     return 0;
   }
 }

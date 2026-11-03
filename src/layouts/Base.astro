@@ -2,6 +2,8 @@
 import profile from '../data/profile.json';
 import '../styles/global.css';
 import '../styles/display-scale.css';
+import '../styles/page-transitions.css';
+import { installPageTransitions } from '../scripts/page-transitions';
 interface Props { title?: string; description?: string; image?: string; page?: string; noindex?: boolean; }
 const { title, description = '肖冠荣的个人创作空间。探索游戏关卡、Unreal Engine 开发、Blender 视觉作品与游戏拆解。', image = '/images/blackhole.webp', page = '', noindex = false } = Astro.props;
 const fullTitle = title ? `${title} — ${profile.brand} / ${profile.name}` : `${profile.brand} — ${profile.name}的个人创作空间`;
@@ -15,6 +17,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="theme-color" content="#080d17" />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark" />
+    <script is:inline set:html={`(${installPageTransitions.toString()})()`}></script>
     <title>{fullTitle}</title>
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -26,10 +29,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:image" content={new URL(image, Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
+    <style is:inline>@view-transition{navigation:auto}html{scrollbar-gutter:stable}</style>
+    <link rel="expect" href="#page-ready" blocking="render" />
     <slot name="head" />
   </head>
   <body class={page}>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
     <slot />
+    <span id="page-ready" hidden></span>
   </body>
 </html>

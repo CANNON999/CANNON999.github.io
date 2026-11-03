@@ -98,6 +98,19 @@ for (const id of embeddedHubs) {
   for (const kind of ['document', 'video', 'download']) if (!detail.includes(`data-resource-kind="${kind}"`)) failures.push(`${id}: missing ${kind} resource card.`);
   if (/<a\b[^>]*href="#"/.test(detail)) failures.push(`${id}: placeholders must not be dead links.`);
 }
+// V1.4 profile: fixed chrome sits outside the only scrolling content pane.
+const about = await readFile(resolve(root, 'about/index.html'), 'utf8');
+const chapters = ['education','experience','projects','campus','skills','games'];
+for (const id of chapters) {
+  if (!about.includes(`aria-controls="${id}"`) || !about.includes(`id="${id}" role="tabpanel" aria-labelledby="profile-tab-${id}"`)) failures.push(`Missing linked resume chapter: ${id}`);
+}
+const fixedTabs = /<nav[^>]*class="profile-tabbar"[^>]*>[\s\S]*?<\/nav>/.exec(about);
+if (about.indexOf('</header>') > about.indexOf('<main') || !fixedTabs || fixedTabs.index + fixedTabs[0].length > about.indexOf('<main')) failures.push('Profile header and tabs must remain outside the reading pane.');
+if ([...about.matchAll(/role="tab"/g)].length !== 6) failures.push('Profile must have exactly six chapter tabs.');
+if (!about.includes('data-profile-content') || !about.includes('class="profile-portrait"') || !about.includes('aria-label="返回个人主页"')) failures.push('Missing profile scroll pane, portrait or back navigation.');
+if (images.filter(tag => attr(tag,'src') === '/images/profile/avatar.webp').length !== 3) failures.push('Home must use the supplied avatar in header, personal tile and identity widget.');
+if ([...about.matchAll(/class="game-stat-card/g)].length !== 4) failures.push('Game overview must have the total plus three real game cards.');
+for (const html of [home, collection, about]) if (!html.slice(0,html.indexOf('</head>')).includes('cannon-page-transition')) failures.push('Page transition controller must register before first paint.');
 const sitemap = await readFile(resolve(root, 'sitemap.xml'), 'utf8');
 if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push('Missing project sitemap route.');
 if (failures.length) {

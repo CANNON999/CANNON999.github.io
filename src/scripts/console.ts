@@ -1,7 +1,9 @@
 import { createPortfolioDust } from './particles';
 import { prepareImages } from './image-readiness';
 import { entryRevealDelay } from './entry-gate';
-import { WheelNavigator, wheelIntent } from './wheel-navigation';
+import { wheelIntent } from './wheel-navigation';
+import { WheelBurstNavigator, PacedWheelSteps } from './wheel-burst';
+import { bindCoverSelection } from './cover-selection';
 import { railOffset } from './rail-layout';
 import { createProjectHub } from './project-hub';
 import { canOpenHub, consoleRoute, isPersonalScene } from '../lib/project-hub';
@@ -35,7 +37,19 @@ let lastFrame = 0;
 let motionTime = 0;
 try { paused = localStorage.getItem('cannon-motion') === 'paused'; } catch { /* Storage can be unavailable in private contexts. */ }
 const motionOff = () => paused || reduced.matches;
-const wheel = new WheelNavigator();
+const wheel = new WheelBurstNavigator();
+const wheelSteps = new PacedWheelSteps();
+let wheelTimer: ReturnType<typeof setTimeout> | undefined;
+function resetWheel() { wheel.reset(); wheelSteps.reset(); clearTimeout(wheelTimer); }
+function drainWheel() {
+  clearTimeout(wheelTimer);
+  if (bootVisible || hub.isOpen() || document.hidden) { resetWheel(); return; }
+  const now = performance.now();
+  const direction = wheelSteps.take(now);
+  if (direction) select(current + direction, false, true, true);
+  const delay = wheelSteps.delay(now);
+  if (delay !== null) wheelTimer = setTimeout(drainWheel, delay);
+}
 const hub = createProjectHub({
   select: id => { const index = tabs.findIndex(tab => tab.dataset.id === id); select(index >= 0 ? index : 0, false, false); },
   restoreFocus: () => tabs[current].focus({ preventScroll: true }),
@@ -83,7 +97,7 @@ async function setBackground(cover: string) {
 }
 
 function select(index: number, focus = false, updateHash = true, fromWheel = false) {
-  if (!fromWheel) wheel.reset();
+  if (!fromWheel) resetWheel();
   const next = Math.max(0, Math.min(tabs.length - 1, index));
   const changed = next !== current;
   current = next;
@@ -94,7 +108,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   });
   const selected = tabs[current];
   document.body.dataset.scene = selected.dataset.id;
-  byId('enter-hint').textContent = selected.dataset.id === 'welcome' ? '个人介绍' : '查看详情';
+  byId('enter-hint').textContent = selected.dataset.id === 'welcome' ? '个人介绍' : selected.dataset.id === 'profile' ? '个人档案' : '选中预览';
   document.documentElement.style.setProperty('--accent', selected.dataset.color!);
   byId('library-count').textContent = `${String(current + 1).padStart(2, '0')} / ${String(tabs.length).padStart(2, '0')}`;
   previousButton.disabled = current === 0;
@@ -112,11 +126,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   resumePaint();
 }
 
-tabs.forEach((tab, index) => tab.addEventListener('click', event => {
-  if (!canOpenHub(event) || bootVisible) return;
-  event.preventDefault();
-  if (isPersonalScene(tab.dataset.id!)) select(index); else hub.open(tab.dataset.id!);
-}));
+bindCoverSelection(tabs, index => select(index), () => bootVisible);
 previousButton.addEventListener('click', () => select(current - 1));
 nextButton.addEventListener('click', () => select(current + 1));
 byId('home-link').addEventListener('click', event => { if (canOpenHub(event)) { event.preventDefault(); select(0); } });
@@ -132,8 +142,10 @@ shell.addEventListener('wheel', event => {
   });
   if (!delta) return;
   event.preventDefault();
-  const direction = wheel.push(delta, performance.now(), event.deltaMode !== 0);
-  if (direction) select(current + direction, false, true, true);
+  const plan = wheel.push(event, delta, performance.now());
+  if (plan.fresh) { wheelSteps.reset(); clearTimeout(wheelTimer); }
+  wheelSteps.add(plan.steps);
+  drainWheel();
 }, { passive: false });
 
 document.addEventListener('keydown', event => {
@@ -162,7 +174,7 @@ document.addEventListener('keydown', event => {
     const id = tabs[current].dataset.id!;
     if (id === 'welcome') select(tabs.findIndex(tab => tab.dataset.id === 'profile'), true);
     else if (id === 'profile') location.assign(tabs[current].href);
-    else hub.open(id);
+    else select(current, true);
   }
 });
 
@@ -219,7 +231,7 @@ function endIntro(immediate = false) {
   hub.syncRoute();
 }
 function showBoot(mode: 'loading' | 'replay') {
-  clearTimeout(bootTimer); clearTimeout(hideTimer); wheel.reset();
+  clearTimeout(bootTimer); clearTimeout(hideTimer); resetWheel();
   introMode = mode; bootVisible = true; root.dataset.startup = mode;
   boot.hidden = false; boot.classList.remove('is-hidden'); boot.inert = false; shell.inert = true;
   byId('retry-loading').hidden = true;
@@ -297,6 +309,7 @@ byId('retry-loading').addEventListener('click', () => { void prepareHome(true); 
 
 function updateMotion() {
   document.body.dataset.motion = motionOff() ? 'paused' : 'playing';
+  window.dispatchEvent(new Event('cannon-motion-change'));
   motionButton.setAttribute('aria-pressed', String(motionOff()));
   motionButton.textContent = reduced.matches ? '已减少动态效果' : paused ? '开启动效' : '暂停动效';
   motionButton.disabled = reduced.matches;
@@ -312,7 +325,7 @@ motionButton.addEventListener('click', () => {
   updateMotion();
 });
 reduced.addEventListener('change', updateMotion);
-document.addEventListener('visibilitychange', () => { wheel.reset(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
+document.addEventListener('visibilitychange', () => { resetWheel(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
 window.addEventListener('resize', () => { positionRail(); ambientDust.resize(); resumePaint(); });
 // Moving between monitors / browser zoom can change DPR without a layout resize.
 function watchPixelRatio() {
@@ -321,7 +334,7 @@ function watchPixelRatio() {
 }
 watchPixelRatio();
 window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); if (bootVisible && introMode !== 'replay') void prepareHome(true); else endIntro(true); } });
-window.addEventListener('pagehide', () => { readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
+window.addEventListener('pagehide', () => { resetWheel(); readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
 
 const route = consoleRoute(location.hash, tabs.filter(tab => tab.dataset.kind === 'project').map(tab => tab.dataset.id!));
 const initial = tabs.findIndex(tab => tab.dataset.id === route.selected);

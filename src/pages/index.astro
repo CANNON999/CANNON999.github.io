@@ -18,7 +18,7 @@ const entries = [
   ...projects.map(p => ({ id: p.id, kind: 'project', name: p.data.title, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
 ];
 const assetHash = createHash('sha256');
-for (const url of [...new Set(entries.map(e => e.cover).filter(Boolean))]) {
+for (const url of [...new Set([...entries.map(e => e.cover).filter(Boolean), profile.avatar])]) {
   // Astro relocates this module during prerender; the build cwd remains the project root.
   assetHash.update(url).update(readFileSync(`public${url}`));
 }
@@ -43,7 +43,7 @@ const entryScript = `(${installEntryGate.toString()})(${JSON.stringify(assetKey)
       <div class="rail-window"><div class="rail-track" role="tablist" aria-label="作品选择" aria-orientation="horizontal">
         {entries.map((entry, index) => <div class="cover-item">
           <a class:list={['cover-button', { 'cover-welcome': entry.id === 'welcome', 'cover-profile': entry.id === 'profile', 'cover-note': !entry.cover && entry.kind === 'project' }]} href={entry.href} id={`tile-${entry.id}`} role="tab" aria-selected={index === 0} aria-controls={`panel-${entry.id}`} aria-label={entry.name} tabindex={index === 0 ? 0 : -1} data-id={entry.id} data-kind={entry.kind} data-cover={entry.cover} data-color={entry.color}>
-            {entry.cover ? <img src={entry.cover} alt="" width="132" height="132" loading="eager" decoding="async" /> : entry.id === 'welcome' ? <svg class="welcome-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="25" stroke="currentColor" stroke-width="1" opacity=".35"/><path d="M32 13c2 13 6 17 19 19-13 2-17 6-19 19-2-13-6-17-19-19 13-2 17-6 19-19Z" fill="currentColor"/></svg> : entry.id === 'profile' ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
+            {entry.cover ? <img src={entry.cover} alt="" width="132" height="132" loading="eager" decoding="async" /> : entry.id === 'welcome' ? <svg class="welcome-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="25" stroke="currentColor" stroke-width="1" opacity=".35"/><path d="M32 13c2 13 6 17 19 19-13 2-17 6-19 19-2-13-6-17-19-19 13-2 17-6 19-19Z" fill="currentColor"/></svg> : entry.id === 'profile' ? <img src={profile.avatar} alt="" width="132" height="132" loading="eager" decoding="async" /> : <span class="note-mark">FIELD<br />NOTES</span>}
           </a>
           <span class="cover-name" aria-hidden="true">{entry.name}</span>
         </div>)}

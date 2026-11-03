@@ -39,6 +39,8 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.4.0 测试报告](docs/test-results/2026-11-04-v1.4.0.md)：个人档案、头像照片、滚轮上限、封面选择与全站转场。
+- [PS5 转场调研](docs/ps5-transition-reference.md)：实机录像、时间点、观察和实现参数。
 - [V1.3.1 测试报告](docs/test-results/2026-11-03-v1.3.1.md)：Mac 基准统一缩放、大屏/4K 布局、作品主标题粗体。
 - [V1.3.0 测试报告](docs/test-results/2026-11-03-v1.3.0.md)：独立欢迎入口、圆形返回按钮、至少一秒开场。
 - [V1.2.0 测试报告](docs/test-results/2026-11-03-v1.2.0.md)：六组件、双导航、作品 Hub 与连续转场的实际验证。
@@ -48,6 +50,9 @@ pnpm verify
 每次新功能或修复都维护上述记录并补对应测试。`pnpm test` 运行输入和内容脚本回归；`pnpm verify` 会先运行测试再检查、构建与校验资源。GitHub 自动发布也运行同一套验证，失败时不会部署。
 
 ## 日常修改位置
+
+个人档案六章及游戏时长在 `src/data/resume.json`；头像/照片路径在 `src/data/profile.json`，图片在 `public/images/profile/`。游戏卡片封面在 `public/images/games/`。更新记录时同步简历版本日期，不把原始简历 PDF 或私人联系方式直接放进 public。
+
 
 | 想修改什么 | 修改位置 |
 | --- | --- |

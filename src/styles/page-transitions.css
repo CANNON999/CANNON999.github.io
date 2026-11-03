@@ -1,0 +1,31 @@
+@view-transition{navigation:auto}
+.site-header{view-transition-name:navigation}
+main{view-transition-name:scene}
+.profile-header{view-transition-name:profile-heading}
+.profile-tabbar{view-transition-name:profile-tabs}
+::view-transition-group(*){animation-duration:420ms;animation-timing-function:cubic-bezier(.22,.8,.22,1)}
+::view-transition-old(root){animation:page-fade-out 320ms ease both}
+::view-transition-new(root){animation:page-fade-in 420ms ease both}
+::view-transition-old(scene){animation:page-scene-out 180ms ease both}
+::view-transition-new(scene){animation:page-scene-in 380ms 70ms cubic-bezier(.22,.8,.22,1) both}
+::view-transition-old(navigation),::view-transition-new(navigation){animation-duration:220ms;mix-blend-mode:normal}
+html[data-page-transition=section-forward],html[data-page-transition=section-back]{--scene-shift:.75rem}
+html[data-page-transition=section-back]{--scene-shift:-.75rem}
+html[data-page-transition^=section]::view-transition-new(scene){animation-name:page-section-in}
+html[data-page-transition^=section]::view-transition-old(scene){animation-name:page-section-out}
+html[data-page-transition=profile-in]::view-transition-new(profile-heading),html[data-page-transition=profile-in]::view-transition-new(profile-tabs){animation:page-profile-in 360ms 40ms cubic-bezier(.22,.8,.22,1) both}
+html[data-page-transition=profile-in]::view-transition-new(scene){animation-delay:140ms;animation-duration:380ms}
+html[data-page-transition=profile-out]::view-transition-old(profile-heading),html[data-page-transition=profile-out]::view-transition-old(profile-tabs){animation:page-profile-out 200ms ease both}
+html[data-page-transition=profile-out]::view-transition-new(scene),html[data-page-transition=detail-out]::view-transition-new(scene){animation-name:page-return-in}
+@keyframes page-fade-out{to{opacity:0}}
+@keyframes page-fade-in{from{opacity:0}}
+@keyframes page-scene-out{to{opacity:0;transform:translateY(-.375rem) scale(.99)}}
+@keyframes page-scene-in{from{opacity:0;transform:translateY(.625rem) scale(.985)}to{opacity:1;transform:none}}
+@keyframes page-return-in{from{opacity:0;transform:scale(1.015)}to{opacity:1;transform:none}}
+@keyframes page-section-in{from{opacity:0;transform:translateX(var(--scene-shift))}to{opacity:1;transform:none}}
+@keyframes page-section-out{to{opacity:0;transform:translateX(calc(var(--scene-shift)*-1))}}
+@keyframes page-profile-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes page-profile-out{to{opacity:0;transform:scale(.98)}}
+html[data-page-motion=off]::view-transition-group(*),html[data-page-motion=off]::view-transition-old(*),html[data-page-motion=off]::view-transition-new(*){animation:none!important}
+@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+@media print{@view-transition{navigation:none}}

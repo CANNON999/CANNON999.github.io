@@ -1,0 +1,48 @@
+{
+  "edition": "2026 夏季简历",
+  "education": [
+    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "法语", "degree": "本科", "period": "2021.08 — 2025.06", "mark": "SJTU" },
+    { "school": "里昂国立应用科学技术学院", "department": "机械学院", "major": "机械专业", "degree": "硕士", "period": "2025.08 — 2026.02", "mark": "INSA" },
+    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "机械工程", "degree": "硕士", "period": "2025.09 — 2028.03", "mark": "SJTU" }
+  ],
+  "experience": [{
+    "company": "上海米哈游网络科技股份有限公司",
+    "team": "原神项目组", "role": "关卡策划", "period": "2024.06 — 2024.09",
+    "items": [
+      { "title": "活动玩法与关卡设计", "text": "参与原神 5.3 版本「衔勇诚砺之证」活动玩法设计、关卡设计，设计优化动线节奏、白盒搭建与跑测、关卡实际布设与配置，以及部分物件设计与评审。" },
+      { "title": "大世界底层玩法", "text": "参与原神 6.0 版本大世界底层玩法「月矩力」设计，提供玩法早期脑洞，协助构建与完善玩法的体系与调性，协助构建玩法白盒。" },
+      { "title": "区域 POI 与动线", "text": "参与原神 6.0 版本挪德卡莱大世界部分二级与三级 POI 玩法设计和评审、动线设计、白盒搭建与跑测，以及物件设计与评审。" }
+    ]
+  }],
+  "projects": [
+    { "title": "以「复制」为主题的第三人称射击关卡白盒", "role": "关卡策划", "period": "2026.03", "description": "基于此前关卡白盒进行全方位改进，优化机制玩法的健壮性与可玩性、关卡节奏、玩法知识引入和锁钥关系。", "contribution": "完成基础玩法、物件与敌人的设计和开发，设计视觉概念、关卡动线、流程与节奏，以 UE5 蓝图 / C++ 实现功能脚本。", "link": "https://space.bilibili.com/46544253", "linkLabel": "前往 Bilibili 查看演示" },
+    { "title": "吉比特游戏制作人大赛 · 即时回合制 JRPG", "role": "系统策划 · 战斗策划 · 程序", "period": "2024.03 — 2025.01", "description": "参考 FF12 的即时回合制形式，确定系统框架与能级关系，构建游戏战斗框架。", "contribution": "使用 UE5 蓝图系统开发游戏角色基础逻辑。" },
+    { "title": "绿洲起源 · 腾讯电子游戏开发课程", "role": "关卡策划 · 场景美术 · 程序", "period": "2022.09 — 2022.12", "description": "确定游戏总体概念，设计关卡流程，以腾讯绿洲起源引擎开发基础脚本、制作关卡白盒。", "contribution": "利用 Blender 制作场景硬表面高模；获得腾讯绿洲起源电子游戏制作项目 300 元优胜奖。" },
+    { "title": "《GTA》系列地图设计拆解", "role": "游戏拆解分析", "period": "2024.01 — 2024.02", "description": "拆解《侠盗猎车手》系列地图的核心体验、总体设计、探索体验、美术与文化，分析优劣并总结沙盒类开放世界游戏的设计方法。", "link": "/works/notes/", "linkLabel": "阅读游戏拆解" },
+    { "title": "关卡设计原型、白盒与游戏设计拆解", "role": "关卡白盒 · 游戏拆解分析", "period": "2023.11 — 2026.03", "description": "撰写关卡文档，构建基础机制玩法乐趣和概念设计，设计流程节奏与动线。", "contribution": "使用 Blender 制作草模，使用 UE5 搭建关卡白盒、开发基础脚本逻辑。", "link": "/works/?type=level", "linkLabel": "浏览关卡作品" },
+    { "title": "场景美术与 Blender 硬表面模型", "role": "美术", "period": "2022.01 — 2025.12", "description": "利用 Quixel 资产在 UE5 搭建游戏场景，在 Blender 制作硬表面高模、程序化 PBR 材质、影视镜头还原和程序化风格化材质展示。", "link": "/works/?type=art", "linkLabel": "浏览视觉作品" }
+  ],
+  "campus": { "name": "上海交通大学幻圆游戏制作社", "role": "社员", "period": "2022.12 — 至今", "description": "多次参加社团茶话会、纸上原型工坊和游戏制作讲座，与社团成员交流游戏体验与创作思考。", "activities": ["茶话会", "纸上原型工坊", "游戏制作讲座", "游戏交流"] },
+  "skills": [
+    { "title": "软件与创作工具", "english": "TOOLS", "items": ["Unreal Engine 5", "Unity", "Blender", "XMind", "Excel"] },
+    { "title": "编程与实现", "english": "DEVELOPMENT", "items": ["C++", "Python", "虚幻蓝图"] },
+    { "title": "语言", "english": "LANGUAGES", "items": ["英语 · CET-6", "法语 · DELF B2", "日语"] }
+  ],
+  "gaming": {
+    "totalHours": "10,000+",
+    "summary": "主机、PC 与移动平台，保持广泛而深入的游戏体验。",
+    "featured": [
+      { "id": "destiny-2", "title": "命运 2", "hours": "2,200+", "label": "长期投入", "image": "/images/games/destiny-2.webp", "url": "https://store.steampowered.com/app/1085660/" },
+      { "id": "elden-ring", "title": "艾尔登法环", "hours": "270+", "label": "开放世界", "image": "/images/games/elden-ring.webp", "url": "https://store.steampowered.com/app/1245620/" },
+      { "id": "helldivers-2", "title": "绝地潜兵 2", "hours": "290+", "label": "协作与挑战", "image": "/images/games/helldivers-2.webp", "url": "https://store.steampowered.com/app/553850/" }
+    ],
+    "groups": [
+      { "title": "开放世界动作冒险", "games": [{"name":"《侠盗猎车手》与《荒野大镖客》系列","hours":"合计 600+ 小时"},{"name":"《塞尔达传说》系列","hours":"200+ 小时"},{"name":"《艾尔登法环》","hours":"270+ 小时"}] },
+      { "title": "单机 / 合作射击", "games": [{"name":"《命运 2》","hours":"2,200+ 小时"},{"name":"《绝地潜兵 2》","hours":"290+ 小时"},{"name":"《合金装备》系列","hours":"200+ 小时"},{"name":"《生化危机》系列","hours":"100+ 小时"}] },
+      { "title": "单机 / 合作动作", "games": [{"name":"《艾尔登法环：黑夜君临》","hours":"160+ 小时"},{"name":"《装甲核心 6》","hours":"140+ 小时"},{"name":"《哈迪斯》系列","hours":"200+ 小时"}] },
+      { "title": "角色扮演", "games": [{"name":"《P5R》","hours":"160+ 小时"},{"name":"《极乐迪斯科》","hours":"60+ 小时"},{"name":"《光与影：33 号远征队》","hours":"60+ 小时"}] },
+      { "title": "跨平台非买断制游戏", "games": [{"name":"《崩坏：星穹铁道》"},{"name":"《原神》"},{"name":"《鸣潮》"},{"name":"《明日方舟：终末地》"}] },
+      { "title": "其他特色单品", "games": [{"name":"《动物井》"},{"name":"《控制》"},{"name":"《死亡搁浅》系列"},{"name":"《非生物因素》"},{"name":"《坎巴拉太空计划》"}] }
+    ]
+  }
+}

@@ -43,10 +43,9 @@ test('W07: subpixel noise and tiny opposite rebounds do not navigate', () => {
 test('W08: a gentle second acceleration can accumulate into a new swipe', () => {
   assert.deepEqual(steps([...swipe, 2, 3, 4, 5, 6, 8, 10, 12]), [1, 1]);
 });
-test('W09: deliberate sustained movement keeps advancing at a bounded pace', () => {
+test('W09: one sustained touchpad drag stays on one selection', () => {
   const result = replay(Array(70).fill(12));
-  assert.ok(result.length >= 3 && result.length <= 6);
-  for (let i = 1; i < result.length; i++) assert.ok(result[i].at - result[i - 1].at >= 220);
+  assert.deepEqual(result.map(event => event.step), [1]);
 });
 test('W10: repeated swipes in both directions do not leave the navigator locked', () => {
   const trace = Array.from({ length: 12 }, (_, i) => swipe.map(x => x * (i < 6 ? 1 : -1))).flat();
