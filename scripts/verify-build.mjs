@@ -52,10 +52,14 @@ for (const tab of tabTags) {
 }
 const selected = tabTags.filter(tag => attr(tag, 'aria-selected') === 'true');
 const visible = panelTags.filter(tag => !/\shidden(?:\s|=|>)/.test(tag));
-if (selected.length !== 1 || attr(selected[0] || '', 'id') !== 'tile-profile' || visible.length !== 1 || attr(visible[0] || '', 'id') !== 'panel-profile') failures.push('Home must start with only the profile tab and panel selected.');
+if (selected.length !== 1 || attr(selected[0] || '', 'id') !== 'tile-welcome' || visible.length !== 1 || attr(visible[0] || '', 'id') !== 'panel-welcome') failures.push('Home must start with only the welcome tab and panel selected.');
+if (tabTags.slice(0, 2).map(tag => attr(tag, 'id')).join(',') !== 'tile-welcome,tile-profile') failures.push('Welcome and profile must remain separate first and second tiles.');
+if (attr(tabTags[0], 'aria-label') !== '欢迎你' || attr(tabTags[1], 'aria-label') !== '个人介绍') failures.push('Personal tile labels must identify their separate scenes.');
+const landing = /<section\b[^>]*id="panel-welcome"[^>]*>([\s\S]*?)<\/section>/.exec(home)?.[1] || '';
+if (!landing.includes('欢迎来到') || !landing.includes('class="landing-name">肖冠荣</strong>') || !landing.includes('的个人主页') || /data-widget|<a\b|<img\b/.test(landing)) failures.push('Welcome must show only the greeting, prominent name and homepage description, without widget/preview cards.');
 const images = [...home.matchAll(/<img\b[^>]*>/g)].map(match => match[0]);
 if (images.some(tag => attr(tag, 'loading') !== 'eager' || attr(tag, 'decoding') !== 'async')) failures.push('All home images must be available to the startup decode gate.');
-if ([...home.matchAll(/<canvas\b/g)].length !== 1 || !home.includes('id="ambient-canvas"')) failures.push('Startup and profile must share a single particle canvas.');
+if ([...home.matchAll(/<canvas\b/g)].length !== 1 || !home.includes('id="ambient-canvas"')) failures.push('Startup, welcome and profile must share a single particle canvas.');
 const head = home.slice(0, home.indexOf('</head>'));
 if (!head.includes('cannon-ready-v2') || !head.includes('visibility:hidden')) failures.push('First-paint readiness gate must be in the document head.');
 if (!home.includes('id="retry-loading"') || !home.includes('id="skip-intro"')) failures.push('Image failures must provide recovery controls.');
@@ -65,12 +69,25 @@ const collection = await readFile(resolve(root, 'works/index.html'), 'utf8');
 if (!homeNav.includes('个人主页') || !homeNav.includes('作品集') || [...homeNav.matchAll(/<a\b/g)].length !== 2) failures.push('Primary navigation must contain exactly the home and portfolio tabs.');
 if (!/<a[^>]*aria-current="page"[^>]*>个人主页<\/a>/.test(homeNav) || !/<a[^>]*aria-current="page"[^>]*>作品集<\/a>/.test(mainNav(collection))) failures.push('Primary navigation must indicate the active section.');
 const widgets = [...home.matchAll(/data-widget="([^"]+)"/g)].map(match => match[1]);
-if (widgets.join(',') !== 'profile,education,tools,projects,internship,interests') failures.push('Welcome must contain exactly the six agreed widgets.');
+if (widgets.join(',') !== 'profile,education,tools,projects,internship,interests') failures.push('Profile must retain exactly the six agreed widgets.');
 if (home.includes('class="cover-word"') || [...home.matchAll(/class="cover-name"/g)].length !== tabCount) failures.push('Remove cover captions while preserving the expanded title.');
 const embeddedHubs = [...home.matchAll(/data-hub-id="([^"]+)"/g)].map(match => match[1]);
-if (embeddedHubs.length !== tabCount - 1 || new Set(embeddedHubs).size !== embeddedHubs.length) failures.push('Every project must have exactly one ready-to-open hub.');
+const projectIds = tabTags.filter(tag => attr(tag, 'data-kind') === 'project').map(tag => attr(tag, 'data-id'));
+if (embeddedHubs.join(',') !== projectIds.join(',') || new Set(embeddedHubs).size !== embeddedHubs.length) failures.push('Every project, and no personal scene, must have exactly one ready-to-open hub.');
+function checkBackButtons(html, expected) {
+  const bars = [...html.matchAll(/<header class="hub-topbar">([\s\S]*?)<\/header>/g)].map(match => match[1]);
+  if (bars.length !== expected.length) failures.push('Missing hub navigation.');
+  bars.forEach((bar, i) => {
+    const back = /<a\b[^>]*class="hub-back"[^>]*>/.exec(bar)?.[0] || '';
+    if (attr(back, 'aria-label') !== '返回作品选择' || attr(back, 'href') !== `/#${expected[i]}` || !bar.includes('<svg') || bar.indexOf('class="hub-back"') > bar.indexOf('class="hub-mini-cover"')) failures.push(`${expected[i]}: accessible back arrow must precede the cover and link to the same selected work.`);
+    const nav = /<nav\b[^>]*class="hub-navigation"[^>]*>([\s\S]*?)<\/nav>/.exec(bar)?.[1] || '';
+    if (nav.includes('返回作品选择') || [...bar.matchAll(/class="hub-back"/g)].length !== 1) failures.push(`${expected[i]}: replace, do not duplicate, the old return link.`);
+  });
+}
+checkBackButtons(home, embeddedHubs);
 for (const id of embeddedHubs) {
   const detail = await readFile(resolve(root, `works/${id}/index.html`), 'utf8');
+  checkBackButtons(detail, [id]);
   if (!detail.includes(`data-hub-id="${id}"`) || !detail.includes('id="project-story"')) failures.push(`${id}: standalone hub and original project story must exist.`);
   for (const kind of ['document', 'video', 'download']) if (!detail.includes(`data-resource-kind="${kind}"`)) failures.push(`${id}: missing ${kind} resource card.`);
   if (/<a\b[^>]*href="#"/.test(detail)) failures.push(`${id}: placeholders must not be dead links.`);
@@ -80,4 +97,4 @@ if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;
-} else console.log(`Verified ${pages.length} HTML pages, ${links} local references, ${tabCount} matching tabs/panels, 6 welcome widgets, ${embeddedHubs.length} project hubs, navigation, and sitemap.`);
+} else console.log(`Verified ${pages.length} HTML pages, ${links} local references, ${tabCount} matching tabs/panels, separate welcome/profile scenes, 6 profile widgets, ${embeddedHubs.length} project hubs with back arrows, navigation, and sitemap.`);

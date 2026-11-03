@@ -15,12 +15,14 @@ export function hubResources(resources: Resource[], projectId: string) {
   };
 }
 
-/** URLs remain shareable; malformed or unknown hashes always recover to the profile. */
+export const isPersonalScene = (id: string) => id === 'welcome' || id === 'profile';
+
+/** Keep both personal scenes shareable; empty/unknown routes open the welcome scene. */
 export function consoleRoute(hash: string, projectIds: string[]) {
   const value = hash.replace(/^#/, '');
   const hubId = value.startsWith('hub-') ? value.slice(4) : null;
   if (hubId && projectIds.includes(hubId)) return { selected: hubId, hub: hubId };
-  return { selected: projectIds.includes(value) ? value : 'profile', hub: null };
+  return { selected: isPersonalScene(value) || projectIds.includes(value) ? value : 'welcome', hub: null };
 }
 
 export function canOpenHub(event: { button?: number; metaKey?: boolean; ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean }) {

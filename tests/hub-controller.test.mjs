@@ -43,6 +43,11 @@ function fixture({ loading = false, reduced = false, hash = '#profile' } = {}) {
   return { api, dialog, document, location, history, scenes, entries,
     frame: () => flush(frames), finish: () => flush(timers),
     cancel: () => events.get('cancel')({ preventDefault() {} }),
+    clickBack: (modifiers = {}) => {
+      let prevented = false;
+      events.get('click')({ button: 0, ...modifiers, target: { closest: selector => selector === '[data-close-hub]' ? {} : null }, preventDefault() { prevented = true; } });
+      return prevented;
+    },
     dismiss: () => dialog.close(),
     state: () => ({ selected, focus, restored }),
   };
@@ -98,4 +103,29 @@ test('H14: loading and unknown projects cannot bypass the entry gate', () => {
   assert.equal(loading.location.hash, '#profile');
   const normal = fixture(); normal.api.open('missing');
   assert.equal(normal.api.isOpen(), false);
+});
+
+test('H17: back-arrow descendants close the hub and restore the same work from the welcome entry', () => {
+  const f = fixture({ hash: '#welcome' }); f.api.open('city'); f.frame();
+  assert.equal(f.clickBack(), true); f.finish();
+  assert.equal(f.api.isOpen(), false);
+  assert.equal(f.location.hash, '#city');
+  assert.equal(f.state().selected, 'city');
+  assert.ok(f.state().restored > 0);
+});
+test('H18: modified back-arrow clicks retain browser link behavior', () => {
+  const f = fixture(); f.api.open('city'); f.frame();
+  for (const modifiers of [{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { button: 1 }]) {
+    assert.equal(f.clickBack(modifiers), false);
+    assert.equal(f.api.isOpen(), true);
+    assert.equal(f.location.hash, '#hub-city');
+  }
+});
+test('H19: direct personal hashes select their own scene without opening a dialog', () => {
+  for (const id of ['welcome', 'profile']) {
+    const f = fixture({ hash: `#${id}` }); f.api.syncRoute(); f.frame();
+    assert.equal(f.state().selected, id);
+    assert.equal(f.api.isOpen(), false);
+    assert.equal(f.document.body.classList.contains('hub-open'), false);
+  }
 });

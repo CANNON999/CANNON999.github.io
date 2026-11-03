@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { installEntryGate } from '../src/scripts/entry-gate.ts';
+import { installEntryGate, entryRevealDelay } from '../src/scripts/entry-gate.ts';
 
 function enter({ stored, referrer = '', blocked = false } = {}) {
   const root = { dataset: {} }, shell = { inert: true }, boot = { hidden: false }, timers = [];
@@ -41,4 +41,15 @@ test('G05: watchdog releases missing-JS HTML but never bypasses an active image 
   const running = enter(); running.root.dataset.startup = 'loading';
   running.timers[0].callback();
   assert.equal(running.root.dataset.startup, 'loading');
+});
+
+test('G06: instant and fast image readiness cannot reveal the homepage before one second', () => {
+  for (const elapsed of [0, 12, 600, 999, 999.5]) {
+    assert.equal(elapsed + entryRevealDelay(elapsed), 1000);
+  }
+});
+test('G07: slow and late image readiness reveal immediately, without adding a second after loading', () => {
+  for (const elapsed of [1000, 1500, 5000, 12001]) {
+    assert.equal(entryRevealDelay(elapsed), 0);
+  }
 });

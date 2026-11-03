@@ -1,8 +1,9 @@
 import { createPortfolioDust } from './particles';
 import { prepareImages } from './image-readiness';
+import { entryRevealDelay } from './entry-gate';
 import { WheelNavigator, wheelIntent } from './wheel-navigation';
 import { createProjectHub } from './project-hub';
-import { canOpenHub, consoleRoute } from '../lib/project-hub';
+import { canOpenHub, consoleRoute, isPersonalScene } from '../lib/project-hub';
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = byId('console-shell');
@@ -89,6 +90,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   });
   const selected = tabs[current];
   document.body.dataset.scene = selected.dataset.id;
+  byId('enter-hint').textContent = selected.dataset.id === 'welcome' ? '个人介绍' : '查看详情';
   document.documentElement.style.setProperty('--accent', selected.dataset.color!);
   byId('library-count').textContent = `${String(current + 1).padStart(2, '0')} / ${String(tabs.length).padStart(2, '0')}`;
   previousButton.disabled = current === 0;
@@ -97,7 +99,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   positionRail();
   if (changed) {
     copyAnimation?.cancel();
-    const copy = panels[current].querySelector('.project-copy, .welcome-widgets');
+    const copy = panels[current].querySelector('.project-copy, .welcome-widgets, .landing-copy');
     if (!motionOff() && copy) copyAnimation = copy.animate([{ opacity: .25, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
   }
   if (changed || front.dataset.cover !== (selected.dataset.cover || '')) void setBackground(selected.dataset.cover || '');
@@ -109,7 +111,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
 tabs.forEach((tab, index) => tab.addEventListener('click', event => {
   if (!canOpenHub(event) || bootVisible) return;
   event.preventDefault();
-  if (index === 0) select(0); else hub.open(tab.dataset.id!);
+  if (isPersonalScene(tab.dataset.id!)) select(index); else hub.open(tab.dataset.id!);
 }));
 previousButton.addEventListener('click', () => select(current - 1));
 nextButton.addEventListener('click', () => select(current + 1));
@@ -153,7 +155,10 @@ document.addEventListener('keydown', event => {
     event.preventDefault(); select(event.key === 'Home' ? 0 : tabs.length - 1, true);
   } else if (event.key === 'Enter' && (!(event.target as Element).closest('a,button') || rail.contains(event.target as Node))) {
     event.preventDefault();
-    if (current === 0) location.assign(tabs[current].href); else hub.open(tabs[current].dataset.id!);
+    const id = tabs[current].dataset.id!;
+    if (id === 'welcome') select(tabs.findIndex(tab => tab.dataset.id === 'profile'), true);
+    else if (id === 'profile') location.assign(tabs[current].href);
+    else hub.open(id);
   }
 });
 
@@ -178,7 +183,7 @@ shell.addEventListener('touchcancel', () => { touchStart = null; }, { passive: t
 shell.addEventListener('click', event => { if (performance.now() < ignoreClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); } }, true);
 
 const ambientDust = createPortfolioDust(byId<HTMLCanvasElement>('ambient-canvas'));
-const wantsParticles = () => bootVisible || current === 0;
+const wantsParticles = () => bootVisible || isPersonalScene(tabs[current].dataset.id!);
 function paint(now: number) {
   frame = 0;
   if (document.hidden || !wantsParticles()) return;
@@ -237,9 +242,9 @@ for (const image of homeImages) {
 }
 async function prepareHome(showLoading: boolean) {
   const generation = ++readinessGeneration;
-  const started = performance.now();
   let allDecoded = false;
   if (showLoading) { showBoot('loading'); shell.setAttribute('aria-busy', 'true'); }
+  const started = performance.now();
   const result = await prepareImages([...imageGroups.keys()], {
     onAllReady: () => {
       if (generation !== readinessGeneration) return;
@@ -251,7 +256,9 @@ async function prepareHome(showLoading: boolean) {
         byId('boot-detail').textContent = `已准备 ${imageGroups.size} / ${imageGroups.size}`;
         byId('boot-progress').setAttribute('aria-valuenow', '100');
         byId('boot-progress').style.setProperty('--load-progress', '1');
-        const remaining = motionOff() ? 0 : Math.max(0, 600 - (performance.now() - started));
+        // Even cached/fast devices see the opening for one second. Reduced motion
+        // keeps a still opening and skips the fade, but retains this reading time.
+        const remaining = entryRevealDelay(performance.now() - started);
         bootTimer = setTimeout(() => { if (generation === readinessGeneration) endIntro(); }, remaining);
       }
     },
@@ -312,7 +319,7 @@ watchPixelRatio();
 window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); if (bootVisible && introMode !== 'replay') void prepareHome(true); else endIntro(true); } });
 window.addEventListener('pagehide', () => { readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
 
-const route = consoleRoute(location.hash, tabs.slice(1).map(tab => tab.dataset.id!));
+const route = consoleRoute(location.hash, tabs.filter(tab => tab.dataset.kind === 'project').map(tab => tab.dataset.id!));
 const initial = tabs.findIndex(tab => tab.dataset.id === route.selected);
 select(initial >= 0 ? initial : 0, false, !location.hash);
 updateMotion();

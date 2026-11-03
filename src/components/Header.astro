@@ -6,7 +6,7 @@ const { active = '', console: onConsole = false } = Astro.props;
 ---
 <header class:list={['site-header', { 'console-header': onConsole }]}>
   <nav class="section-nav" aria-label="主导航">
-    <a id={onConsole ? 'home-link' : undefined} href={onConsole ? '/#profile' : '/'} aria-current={active === 'home' ? 'page' : undefined}>个人主页</a>
+    <a id={onConsole ? 'home-link' : undefined} href={onConsole ? '/#welcome' : '/'} aria-current={active === 'home' ? 'page' : undefined}>个人主页</a>
     <a href="/works/" aria-current={active === 'works' ? 'page' : undefined}>作品集</a>
   </nav>
   <div class="header-right">

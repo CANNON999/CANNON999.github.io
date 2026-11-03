@@ -1,3 +1,8 @@
+/** Called only after every image has decoded; loading runs during this minimum. */
+export function entryRevealDelay(elapsed: number) {
+  return Math.max(0, 1000 - elapsed);
+}
+
 // Self-contained: serialized into the head so it runs before the first body paint.
 export function installEntryGate(assetKey: string) {
   const root = document.documentElement;

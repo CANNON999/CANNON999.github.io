@@ -13,9 +13,11 @@ const Heading = embedded ? 'h2' : 'h1';
   <div class:list={['hub-art', { 'notes-background': !d.cover }]} aria-hidden="true"></div>
   <div class="hub-shade" aria-hidden="true"></div>
   <header class="hub-topbar">
-    <div class="hub-identity"><span class="hub-mini-cover" aria-hidden="true">{!d.cover && 'N'}</span><span class="hub-category">{categories[d.category].label}</span><span class="hub-name">{d.title}</span></div>
+    <div class="hub-identity">
+      <a class="hub-back" href={`/#${project.id}`} data-close-hub={embedded ? '' : undefined} aria-label="返回作品选择" title="返回作品选择"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <span class="hub-mini-cover" aria-hidden="true">{!d.cover && 'N'}</span><span class="hub-category">{categories[d.category].label}</span><span class="hub-name">{d.title}</span>
+    </div>
     <nav class="hub-navigation" aria-label="作品导航">
-      <a href={`/#${project.id}`} data-close-hub={embedded ? '' : undefined}>← 返回作品选择</a>
       <a href="/works/">作品集</a>
     </nav>
   </header>

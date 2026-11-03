@@ -37,7 +37,7 @@ test('H04: hub deep links and restored history resolve the same selected project
 });
 test('H05: unknown, malformed and empty routes never open a missing hub', () => {
   for (const hash of ['', '#', '#hub-', '#hub-missing', '#%E0%A4%A', '#constructor', '#__proto__']) {
-    assert.deepEqual(consoleRoute(hash, ['abyss']), { selected: 'profile', hub: null });
+    assert.deepEqual(consoleRoute(hash, ['abyss']), { selected: 'welcome', hub: null });
   }
 });
 test('H06: hyphenated project ids can be shared and opened', () => {
@@ -53,4 +53,16 @@ test('H08: resource grouping does not mutate the author’s content or ordering'
   first.groups[2].resources.push({ kind: 'download', label: 'Other', url: 'https://example.com/other' });
   assert.equal(resources.length, 1);
   assert.equal(hubResources(resources, 'tanks').groups[2].resources.length, 1);
+});
+
+test('H15: welcome and profile are distinct, shareable personal scenes', () => {
+  for (const id of ['welcome', 'profile']) {
+    assert.deepEqual(consoleRoute(`#${id}`, ['abyss', 'notes']), { selected: id, hub: null });
+  }
+  assert.deepEqual(consoleRoute('', ['abyss']), { selected: 'welcome', hub: null });
+});
+test('H16: personal scenes never resolve to phantom project hubs', () => {
+  for (const hash of ['#hub-welcome', '#hub-profile']) {
+    assert.deepEqual(consoleRoute(hash, ['abyss', 'notes']), { selected: 'welcome', hub: null });
+  }
 });

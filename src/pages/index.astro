@@ -3,16 +3,19 @@ import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import WelcomeWidgets from '../components/WelcomeWidgets.astro';
 import ProjectHub from '../components/ProjectHub.astro';
+import profile from '../data/profile.json';
 import { getProjects, projectPath, categories } from '../lib/content';
 import '../styles/console.css';
 import '../styles/particles.css';
+import '../styles/landing.css';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { installEntryGate } from '../scripts/entry-gate';
 const projects = await getProjects();
 const entries = [
-  { id: 'profile', name: '个人介绍', short: 'PROFILE', cover: '', color: '#b6c9ec', href: '/about/' },
-  ...projects.map(p => ({ id: p.id, name: p.data.title, short: p.data.short, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
+  { id: 'welcome', kind: 'personal', name: '欢迎你', cover: '', color: '#dbc6a9', href: '/#welcome' },
+  { id: 'profile', kind: 'personal', name: '个人介绍', cover: '', color: '#b6c9ec', href: '/about/' },
+  ...projects.map(p => ({ id: p.id, kind: 'project', name: p.data.title, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
 ];
 const assetHash = createHash('sha256');
 for (const url of [...new Set(entries.map(e => e.cover).filter(Boolean))]) {
@@ -39,8 +42,8 @@ const entryScript = `(${installEntryGate.toString()})(${JSON.stringify(assetKey)
     <nav class="library" aria-label="横向作品库">
       <div class="rail-window"><div class="rail-track" role="tablist" aria-label="作品选择" aria-orientation="horizontal">
         {entries.map((entry, index) => <div class="cover-item">
-          <a class:list={['cover-button', { 'cover-profile': index === 0, 'cover-note': !entry.cover && index !== 0 }]} href={entry.href} id={`tile-${entry.id}`} role="tab" aria-selected={index === 0} aria-controls={`panel-${entry.id}`} aria-label={entry.name} tabindex={index === 0 ? 0 : -1} data-id={entry.id} data-cover={entry.cover} data-color={entry.color}>
-            {entry.cover ? <img src={entry.cover} alt="" width="132" height="132" loading="eager" decoding="async" /> : index === 0 ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
+          <a class:list={['cover-button', { 'cover-welcome': entry.id === 'welcome', 'cover-profile': entry.id === 'profile', 'cover-note': !entry.cover && entry.kind === 'project' }]} href={entry.href} id={`tile-${entry.id}`} role="tab" aria-selected={index === 0} aria-controls={`panel-${entry.id}`} aria-label={entry.name} tabindex={index === 0 ? 0 : -1} data-id={entry.id} data-kind={entry.kind} data-cover={entry.cover} data-color={entry.color}>
+            {entry.cover ? <img src={entry.cover} alt="" width="132" height="132" loading="eager" decoding="async" /> : entry.id === 'welcome' ? <svg class="welcome-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="25" stroke="currentColor" stroke-width="1" opacity=".35"/><path d="M32 13c2 13 6 17 19 19-13 2-17 6-19 19-2-13-6-17-19-19 13-2 17-6 19-19Z" fill="currentColor"/></svg> : entry.id === 'profile' ? <span class="cover-monogram">C</span> : <span class="note-mark">FIELD<br />NOTES</span>}
           </a>
           <span class="cover-name" aria-hidden="true">{entry.name}</span>
         </div>)}
@@ -49,7 +52,10 @@ const entryScript = `(${installEntryGate.toString()})(${JSON.stringify(assetKey)
       <div class="library-label"><a href="/works/">全部作品 ↗</a><span id="library-count">01 / {String(entries.length).padStart(2, '0')}</span></div>
     </nav>
     <main id="main-content" class="main-stage" tabindex="-1">
-      <section id="panel-profile" class="scene-panel welcome-panel" role="tabpanel" aria-labelledby="tile-profile">
+      <section id="panel-welcome" class="scene-panel landing-panel" role="tabpanel" aria-labelledby="tile-welcome">
+        <div class="landing-copy"><h1><span class="landing-greeting">欢迎来到</span><strong class="landing-name">{profile.name}</strong><span class="landing-description">的个人主页</span></h1></div>
+      </section>
+      <section id="panel-profile" class="scene-panel welcome-panel" role="tabpanel" aria-labelledby="tile-profile" hidden>
         <WelcomeWidgets projects={projects} />
       </section>
       {projects.map((project, i) => {
@@ -70,7 +76,7 @@ const entryScript = `(${installEntryGate.toString()})(${JSON.stringify(assetKey)
         </section>;
       })}
     </main>
-    <footer class="bottom-bar"><span class="edition-label">CANNON / SELECTED WORK</span><div class="control-hints"><span><kbd>←</kbd><kbd>→</kbd> 切换作品</span><span><kbd>Enter</kbd> 查看详情</span></div><span class="touch-hint">↔ 左右轻扫，探索作品</span><div class="motion-controls"><button id="toggle-motion" type="button" aria-pressed="false">暂停动效</button><button id="replay-intro" type="button">◌ 重播开场</button></div></footer>
+    <footer class="bottom-bar"><span class="edition-label">CANNON / SELECTED WORK</span><div class="control-hints"><span><kbd>←</kbd><kbd>→</kbd> 切换作品</span><span><kbd>Enter</kbd> <span id="enter-hint">个人介绍</span></span></div><span class="touch-hint">↔ 左右轻扫，探索作品</span><div class="motion-controls"><button id="toggle-motion" type="button" aria-pressed="false">暂停动效</button><button id="replay-intro" type="button">◌ 重播开场</button></div></footer>
     <p class="sr-only" id="selection-status" aria-live="polite" aria-atomic="true"></p>
   </div>
   <dialog id="project-hub-dialog" class="hub-dialog" aria-label="作品展示" tabindex="-1">
