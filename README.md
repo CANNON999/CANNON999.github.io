@@ -39,6 +39,7 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.3.1 测试报告](docs/test-results/2026-11-03-v1.3.1.md)：Mac 基准统一缩放、大屏/4K 布局、作品主标题粗体。
 - [V1.3.0 测试报告](docs/test-results/2026-11-03-v1.3.0.md)：独立欢迎入口、圆形返回按钮、至少一秒开场。
 - [V1.2.0 测试报告](docs/test-results/2026-11-03-v1.2.0.md)：六组件、双导航、作品 Hub 与连续转场的实际验证。
 - [V1.1.0 测试报告](docs/test-results/2026-11-03-v1.1.0.md)：粒子背景、首次加载和相关回归的实际结果与边界。
@@ -57,7 +58,8 @@ pnpm verify
 | 个人介绍六组件内容与样式 | `src/components/WelcomeWidgets.astro`、`src/styles/welcome.css`（资料读取 profile.json） |
 | 主导航和右侧个人入口 | `src/components/Header.astro`、`src/styles/navigation.css` |
 | 作品 Hub、资源分组和转场 | `src/components/ProjectHub.astro`、`src/lib/project-hub.ts`、`src/scripts/project-hub.ts`、`src/styles/project-hub.css` |
-| 主机界面布局与响应式样式 | `src/styles/console.css` |
+| 大屏比例与基础尺寸 | `src/styles/display-scale.css`；UI 尺寸使用 rem，Mac 基准 1rem=16px |
+| 主机界面布局与响应式样式 | `src/styles/console.css`；封面定位在 `src/scripts/rail-layout.ts` |
 | 作品列表、详情、个人档案样式 | `src/styles/global.css` |
 | 滚轮、键盘、开场、动效偏好 | `src/scripts/console.ts` |
 | 粒子构图、运动、分辨率与性能策略 | `src/scripts/particle-field.ts`、`src/scripts/particles.ts` |
@@ -146,6 +148,9 @@ GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度�
 这里保留了 GitHub 仓库资料。百度网盘、腾讯文档中的外部文件未下载到备份，首版继续使用旧站提供的原链接。
 
 ## 交互与实现约定
+
+- 桌面以 1504×862 的 Mac 浏览器视口为基准，随可用宽高等比放大字体、封面、按钮、卡片和间距；保留窄屏布局。尺寸用 rem，避免新增固定像素组件破坏比例。粒子画布保持原生 DPR，不用整页截图缩放。
+- 作品预览及 Hub 最大标题统一 700 字重；顶部封面右下小标题保留细体。
 
 - 首次进入先显示动态粒子和加载提示，开场至少展示 1 秒，期间同时加载首页图片；全部解码后平滑进入“欢迎你”；同标签页、站内返回及作品切换不强制重播。图片失败或超过 12 秒时可重试或主动进入；迟到的图片全部解码后仍会自动进入。手动重播可立即跳过。
 - 滚轮向下/右选择下一项，向上/左选择上一项；普通轻扫一项，连续新手势可在惯性尾部和动画中响应；持续稳定推移可以继续浏览，衰减惯性不连跳。

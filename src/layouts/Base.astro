@@ -1,6 +1,7 @@
 ---
 import profile from '../data/profile.json';
 import '../styles/global.css';
+import '../styles/display-scale.css';
 interface Props { title?: string; description?: string; image?: string; page?: string; noindex?: boolean; }
 const { title, description = '肖冠荣的个人创作空间。探索游戏关卡、Unreal Engine 开发、Blender 视觉作品与游戏拆解。', image = '/images/blackhole.webp', page = '', noindex = false } = Astro.props;
 const fullTitle = title ? `${title} — ${profile.brand} / ${profile.name}` : `${profile.brand} — ${profile.name}的个人创作空间`;

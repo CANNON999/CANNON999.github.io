@@ -2,6 +2,7 @@ import { createPortfolioDust } from './particles';
 import { prepareImages } from './image-readiness';
 import { entryRevealDelay } from './entry-gate';
 import { WheelNavigator, wheelIntent } from './wheel-navigation';
+import { railOffset } from './rail-layout';
 import { createProjectHub } from './project-hub';
 import { canOpenHub, consoleRoute, isPersonalScene } from '../lib/project-hub';
 
@@ -44,13 +45,16 @@ const hub = createProjectHub({
 
 function positionRail() {
   const css = getComputedStyle(document.documentElement);
-  const small = parseFloat(css.getPropertyValue('--cover-small'));
-  const large = parseFloat(css.getPropertyValue('--cover-large'));
-  const gap = parseFloat(css.getPropertyValue('--cover-gap'));
-  const viewport = document.querySelector('.rail-window')!.clientWidth - 16;
-  const total = (tabs.length - 1) * (small + gap) + large;
-  const previousContext = innerWidth < 700 ? small + gap : Math.min(2 * (small + gap), viewport * .2);
-  const offset = total > viewport ? Math.max(0, current * (small + gap) - previousContext) : 0;
+  // The custom sizes are rem values; getComputedStyle preserves their units.
+  const offset = railOffset({
+    current, count: tabs.length,
+    viewportWidth: document.querySelector('.rail-window')!.clientWidth,
+    rootFontSize: parseFloat(css.fontSize),
+    smallRem: parseFloat(css.getPropertyValue('--cover-small')),
+    largeRem: parseFloat(css.getPropertyValue('--cover-large')),
+    gapRem: parseFloat(css.getPropertyValue('--cover-gap')),
+    compact: innerWidth < 700,
+  });
   rail.style.setProperty('--rail-offset', `${-offset}px`);
   byId('wheel-hint').textContent = innerWidth < 600 ? '左右轻扫' : '滚轮向下 · 向右浏览';
 }
@@ -100,7 +104,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
   if (changed) {
     copyAnimation?.cancel();
     const copy = panels[current].querySelector('.project-copy, .welcome-widgets, .landing-copy');
-    if (!motionOff() && copy) copyAnimation = copy.animate([{ opacity: .25, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    if (!motionOff() && copy) copyAnimation = copy.animate([{ opacity: .25, transform: 'translateY(.375rem)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
   }
   if (changed || front.dataset.cover !== (selected.dataset.cover || '')) void setBackground(selected.dataset.cover || '');
   if (updateHash) history.replaceState(null, '', `#${selected.dataset.id}`);

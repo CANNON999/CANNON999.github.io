@@ -1,0 +1,8 @@
+/* Mac reference: 1504 × 862 CSS pixels, with a 16px root font.
+ * 1504 / 16 = 94; 862 / 16 = 53.875.
+ * Scale the same rem unit by the limiting viewport dimension, so wide/short
+ * windows never crop controls. Narrow layouts retain their existing breakpoints.
+ * This reflows real text/SVG/layout; it does not stretch a rasterized page or canvas.
+ */
+:root{font-size:100%;font-size:max(100%,min(calc(100vw / 94),calc(100svh / 53.875)))}
+@media print{:root{font-size:100%}}

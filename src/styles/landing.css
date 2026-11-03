@@ -2,9 +2,9 @@
 .cover-welcome{background:radial-gradient(ellipse at 22% 4%,#696261,#33323a 44%,#151822 90%);color:#f0e5d7}
 .welcome-mark{position:absolute;inset:24%;width:52%;height:52%}
 .scene-panel.landing-panel{height:100%;align-items:center}
-.landing-copy{padding-bottom:2svh;text-shadow:0 4px 32px #080a1433}
-.landing-copy h1{display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;letter-spacing:1.5px;font-weight:400}
-.landing-greeting,.landing-description{font-size:clamp(24px,2.15vw,36px);font-weight:400;color:#e2e3e8}
-.landing-name{font-size:clamp(68px,6.4vw,112px);font-weight:700;letter-spacing:4px;line-height:1.2;margin:14px 0 18px;color:#f5f5f7}
-@media(max-width:600px){.landing-copy{padding-bottom:6svh}.landing-greeting,.landing-description{font-size:24px}.landing-name{font-size:clamp(56px,15vw,78px);letter-spacing:2px;margin:14px 0 16px}}
-@media(max-height:560px){.landing-copy{padding-block:15px}.landing-greeting,.landing-description{font-size:21px}.landing-name{font-size:56px;margin:8px 0}}
+.landing-copy{padding-bottom:2svh;text-shadow:0 0.25rem 2rem #080a1433}
+.landing-copy h1{display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;letter-spacing:0.09375rem;font-weight:400}
+.landing-greeting,.landing-description{font-size:clamp(1.5rem,2.15vw,2.021rem);font-weight:400;color:#e2e3e8}
+.landing-name{font-size:clamp(4.25rem,6.4vw,6.016rem);font-weight:700;letter-spacing:0.25rem;line-height:1.2;margin:0.875rem 0 1.125rem;color:#f5f5f7}
+@media(max-width:600px){.landing-copy{padding-bottom:6svh}.landing-greeting,.landing-description{font-size:1.5rem}.landing-name{font-size:clamp(3.5rem,15vw,4.875rem);letter-spacing:0.125rem;margin:0.875rem 0 1rem}}
+@media(max-height:560px){.landing-copy{padding-block:0.9375rem}.landing-greeting,.landing-description{font-size:1.3125rem}.landing-name{font-size:3.5rem;margin:0.5rem 0}}

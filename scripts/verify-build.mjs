@@ -36,6 +36,12 @@ for (const file of pages) {
   if (/设计样稿|后续迁移时|后续补充最新/.test(html)) failures.push(`${file}: prototype placeholder text`);
 }
 const home = await readFile(resolve(root, 'index.html'), 'utf8');
+const stylePaths = [...home.matchAll(/<link\b[^>]*href="([^\"]+\.css)"[^>]*>/g)].map(match => resolve(root, `.${match[1]}`));
+const homeStyles = (await Promise.all(stylePaths.map(path => readFile(path, 'utf8')))).join('\n');
+const railSizes = [...homeStyles.matchAll(/--cover-(?:small|large|gap):([^;}]+)/g)].map(match => match[1].trim());
+// console.ts passes these values to rail-layout.ts as rems. Reject a unit drift
+// that would leave large-screen covers outside their calculated selection slot.
+if (railSizes.length < 3 || railSizes.some(size => !/^(?:\d*\.)?\d+rem$/.test(size))) failures.push('Cover dimensions must stay in rem units shared by layout and rail navigation.');
 const tabCount = [...home.matchAll(/role="tab"/g)].length;
 const panelCount = [...home.matchAll(/role="tabpanel"/g)].length;
 if (tabCount !== panelCount || tabCount < 2) failures.push(`Tabs (${tabCount}) do not match panels (${panelCount}).`);
