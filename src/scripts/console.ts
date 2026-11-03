@@ -6,6 +6,7 @@ import { WheelBurstNavigator, PacedWheelSteps } from './wheel-burst';
 import { bindCoverSelection } from './cover-selection';
 import { railOffset } from './rail-layout';
 import { createProjectHub } from './project-hub';
+import { createSceneBackground } from './scene-background';
 import { canOpenHub, consoleRoute, isPersonalScene } from '../lib/project-hub';
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -19,8 +20,6 @@ const boot = byId('boot-screen');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const motionButton = byId<HTMLButtonElement>('toggle-motion');
 const replayButton = byId<HTMLButtonElement>('replay-intro');
-const front = document.querySelector<HTMLElement>('.world-current')!;
-const back = document.querySelector<HTMLElement>('.world-previous')!;
 let current = 0;
 let paused = false;
 const root = document.documentElement;
@@ -29,8 +28,6 @@ let introMode: 'loading' | 'error' | 'replay' | 'none' = bootVisible ? 'loading'
 let readinessGeneration = 0;
 let bootTimer: ReturnType<typeof setTimeout>;
 let hideTimer: ReturnType<typeof setTimeout>;
-let backgroundGeneration = 0;
-let backgroundAnimations: Animation[] = [];
 let copyAnimation: Animation | undefined;
 let frame = 0;
 let lastFrame = 0;
@@ -56,6 +53,12 @@ const hub = createProjectHub({
   motionOff,
   isLoading: () => bootVisible,
 });
+const background = createSceneBackground({
+  backdrop: document.querySelector<HTMLElement>('.backdrop')!,
+  layers: [document.querySelector<HTMLElement>('.world-previous')!, document.querySelector<HTMLElement>('.world-current')!],
+  motionOff,
+  onParticleVisibilityChange: resumePaint,
+});
 
 function positionRail() {
   const css = getComputedStyle(document.documentElement);
@@ -71,29 +74,6 @@ function positionRail() {
   });
   rail.style.setProperty('--rail-offset', `${-offset}px`);
   byId('wheel-hint').textContent = innerWidth < 600 ? '左右轻扫' : '滚轮向下 · 向右浏览';
-}
-
-async function setBackground(cover: string) {
-  const generation = ++backgroundGeneration;
-  if (cover) {
-    const image = new Image();
-    image.src = cover;
-    try { await image.decode(); } catch { if (generation !== backgroundGeneration) return; cover = ''; }
-  }
-  if (generation !== backgroundGeneration) return;
-  const old = front.style.backgroundImage;
-  backgroundAnimations.forEach(animation => animation.cancel());
-  back.style.backgroundImage = old;
-  back.style.opacity = old && old !== 'none' ? '.83' : '0';
-  front.style.backgroundImage = cover ? `url("${cover}")` : 'none';
-  front.dataset.cover = cover;
-  front.style.opacity = cover ? '.83' : '0';
-  if (!motionOff()) {
-    backgroundAnimations = [
-      front.animate([{ opacity: 0, transform: 'scale(1.012)' }, { opacity: cover ? .83 : 0, transform: 'scale(1)' }], { duration: 620, easing: 'cubic-bezier(.2,.65,.25,1)' }),
-      back.animate([{ opacity: back.style.opacity }, { opacity: 0 }], { duration: 620, fill: 'forwards', easing: 'ease-out' }),
-    ];
-  } else back.style.opacity = '0';
 }
 
 function select(index: number, focus = false, updateHash = true, fromWheel = false) {
@@ -120,7 +100,7 @@ function select(index: number, focus = false, updateHash = true, fromWheel = fal
     const copy = panels[current].querySelector('.project-copy, .welcome-widgets, .landing-copy');
     if (!motionOff() && copy) copyAnimation = copy.animate([{ opacity: .25, transform: 'translateY(.375rem)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' });
   }
-  if (changed || front.dataset.cover !== (selected.dataset.cover || '')) void setBackground(selected.dataset.cover || '');
+  void background.show({ personal: isPersonalScene(selected.dataset.id!), cover: selected.dataset.cover || '' });
   if (updateHash) history.replaceState(null, '', `#${selected.dataset.id}`);
   if (focus) selected.focus({ preventScroll: true });
   resumePaint();
@@ -199,7 +179,7 @@ shell.addEventListener('touchcancel', () => { touchStart = null; }, { passive: t
 shell.addEventListener('click', event => { if (performance.now() < ignoreClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); } }, true);
 
 const ambientDust = createPortfolioDust(byId<HTMLCanvasElement>('ambient-canvas'));
-const wantsParticles = () => bootVisible || isPersonalScene(tabs[current].dataset.id!);
+const wantsParticles = () => bootVisible || background.needsParticles();
 function paint(now: number) {
   frame = 0;
   if (document.hidden || !wantsParticles()) return;
@@ -314,7 +294,7 @@ function updateMotion() {
   motionButton.textContent = reduced.matches ? '已减少动态效果' : paused ? '开启动效' : '暂停动效';
   motionButton.disabled = reduced.matches;
   replayButton.disabled = motionOff();
-  if (motionOff()) { copyAnimation?.cancel(); backgroundAnimations.forEach(animation => animation.finish()); if (introMode === 'replay') endIntro(true); }
+  if (motionOff()) { copyAnimation?.cancel(); background.finish(); if (introMode === 'replay') endIntro(true); }
   resumePaint();
 }
 byId('skip-intro').addEventListener('click', () => { if (introMode !== 'loading') endIntro(); });
@@ -334,7 +314,7 @@ function watchPixelRatio() {
 }
 watchPixelRatio();
 window.addEventListener('pageshow', event => { if (event.persisted) { select(current, false, false); if (bootVisible && introMode !== 'replay') void prepareHome(true); else endIntro(true); } });
-window.addEventListener('pagehide', () => { resetWheel(); readinessGeneration++; cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
+window.addEventListener('pagehide', () => { resetWheel(); readinessGeneration++; background.suspend(); cancelAnimationFrame(frame); clearTimeout(bootTimer); clearTimeout(hideTimer); });
 
 const route = consoleRoute(location.hash, tabs.filter(tab => tab.dataset.kind === 'project').map(tab => tab.dataset.id!));
 const initial = tabs.findIndex(tab => tab.dataset.id === route.selected);

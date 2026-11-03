@@ -39,6 +39,7 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.4.1 测试报告](docs/test-results/2026-11-04-v1.4.1.md)：个人介绍与作品背景回切闪烁修复。
 - [V1.4.0 测试报告](docs/test-results/2026-11-04-v1.4.0.md)：个人档案、头像照片、滚轮上限、封面选择与全站转场。
 - [PS5 转场调研](docs/ps5-transition-reference.md)：实机录像、时间点、观察和实现参数。
 - [V1.3.1 测试报告](docs/test-results/2026-11-03-v1.3.1.md)：Mac 基准统一缩放、大屏/4K 布局、作品主标题粗体。
@@ -67,6 +68,7 @@ pnpm verify
 | 主机界面布局与响应式样式 | `src/styles/console.css`；封面定位在 `src/scripts/rail-layout.ts` |
 | 作品列表、详情、个人档案样式 | `src/styles/global.css` |
 | 滚轮、键盘、开场、动效偏好 | `src/scripts/console.ts` |
+| 作品与粒子背景切换 | `src/scripts/scene-background.ts` |
 | 粒子构图、运动、分辨率与性能策略 | `src/scripts/particle-field.ts`、`src/scripts/particles.ts` |
 | 粒子背景光照与加载界面样式 | `src/styles/particles.css` |
 | 首次访问判断、图片等待和异常恢复 | `src/scripts/entry-gate.ts`、`src/scripts/image-readiness.ts`、`src/scripts/console.ts` |
@@ -165,7 +167,7 @@ GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度�
 - 个人介绍固定六个组件：桌面三列、手机两列，没有隐藏分页。组件上的滚轮不切换作品。实习经历暂待补充；资料仍以真实 profile.json 为准。
 - Hub 的文档、视频、下载卡片自动读取作品 resources；有多个视频/工程包会全部保留，缺资源只显示待补充。主要按钮优先文档，无资源则前往本站作品介绍。
 - 手机支持横向手势；短屏或放大页面可以正常纵向滚动，详情页始终按常规方式阅读。
-- 粒子画布匹配显示器实际 DPR；性能不足时减少数量和更新频率，不降低画布分辨率。支持系统“减少动态效果”和手动暂停；作品画面及页面隐藏时停止粒子帧循环。
+- 粒子画布匹配显示器实际 DPR；性能不足时减少数量和更新频率，不降低画布分辨率。支持系统“减少动态效果”和手动暂停；作品背景完全遮盖粒子后及页面隐藏时停止粒子帧循环；过渡期间保持同一粒子场连续。
 - 没有 JavaScript 时仍可通过封面链接、作品库和详情页访问内容。
 - 不自动播放音频，不使用访客账号、表单后端或统计追踪。
 
