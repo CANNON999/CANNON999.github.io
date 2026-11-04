@@ -6,7 +6,7 @@ test('M01: every row includes every tool once; adding another tool updates all r
   for (const count of [1, 6, 14, 15, 30]) {
     const tools = Array.from({ length: count }, (_, id) => ({ id }));
     const rows = toolRows(tools);
-    assert.equal(rows.length, 3);
+    assert.equal(rows.length, 7);
     for (const row of rows) assert.deepEqual(row.map(t => t.id).sort((a,b) => a-b), tools.map(t => t.id));
     assert.deepEqual(tools.map(t => t.id), Array.from({ length: count }, (_, i) => i));
     if (count > 1) assert.notDeepEqual(rows[0], rows[1]);

@@ -39,6 +39,7 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.5.1 测试报告](docs/test-results/2026-11-04-v1.5.1.md)：放大图标轮廓、30°斜向循环与标题局部羽化模糊。
 - [V1.5.0 测试报告](docs/test-results/2026-11-04-v1.5.0.md)：导航对齐、四章档案、固定照片与 14 工具图标墙。
 - [工具与学校图标来源](docs/icon-sources.md)：官方资源、许可记录和本地处理。
 - [V1.4.1 测试报告](docs/test-results/2026-11-04-v1.4.1.md)：个人介绍与作品背景回切闪烁修复。
@@ -81,7 +82,7 @@ pnpm verify
 
 ## 添加创作工具图标
 
-在 `public/images/tools/` 放官方来源的 SVG 或优化 WebP，在 `src/data/tools.json` 添加唯一 `id`、显示 `name`、本地 `image` 与官网 `url`。三个循环行、读屏列表和首页加载清单会自动更新；不必修改组件。同步 `docs/icon-sources.md` 来源记录，然后运行 `pnpm verify` 并查看工具卡，确认完整图标、标题模糊及无缝循环。不要引入外站热链或脚本型 SVG。
+在 `public/images/tools/` 放官方来源的 SVG 或优化 WebP，在 `src/data/tools.json` 添加唯一 `id`、显示 `name`、本地 `image` 与官网 `url`。七个倾斜循环行、读屏列表和首页加载清单会自动更新；不必修改组件。同步 `docs/icon-sources.md` 来源记录，然后运行 `pnpm verify` 并查看工具卡，确认完整图标轮廓、标题局部羽化模糊及倾斜循环无空角。不要引入外站热链或脚本型 SVG。
 
 ## 添加新作品
 

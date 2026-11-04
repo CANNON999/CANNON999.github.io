@@ -118,8 +118,8 @@ const toolRows = [...home.matchAll(/<div class="tool-track">([\s\S]*?)<\/div>\s*
 const toolCatalogue = JSON.parse(await readFile('src/data/tools.json', 'utf8'));
 // Keep the standard declaration after the prefixed fallback: the production
 // optimizer otherwise may retain only WebKit's version, leaving Chromium sharp.
-if (!/\.widget-tools \.widget-heading\{[^}]*[;{]backdrop-filter:blur\(/.test(homeStyles)) failures.push('Tool heading must retain a standard backdrop blur in the production CSS.');
-if (toolRows.length !== 3 || !toolCatalogue.length) failures.push('Tool card needs three populated animated rows.');
+if (!/\.widget-tools \.widget-heading:{1,2}before\{[^}]*[;{]backdrop-filter:blur\(/.test(homeStyles)) failures.push('Tool heading must retain a local standard backdrop blur in its production pseudo-element.');
+if (toolRows.length !== 7 || !toolCatalogue.length) failures.push('Diagonal tool card needs seven populated animated rows.');
 for (const row of toolRows) {
   const icons = [...row.matchAll(/data-tool="([^"]+)"/g)].map(match => match[1]);
   const half = icons.length / 2;

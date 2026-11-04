@@ -6,7 +6,7 @@ import '../styles/tool-marquee.css';
 ---
 <article class="welcome-widget widget-tools" data-widget="tools" aria-labelledby="tools-heading">
   <div class="tool-wall" aria-hidden="true">
-    {toolRows(tools).map((row, index) => <div class="tool-row" style={`--row-shift:${index % 2 ? '-1.875rem' : '0rem'}`}>
+    {toolRows(tools).map((row, index) => <div class="tool-row" style={`--row-shift:${index % 2 ? 'calc(var(--tool-pitch) / -2)' : '0rem'}`}>
       <div class="tool-track">
         {[0, 1].map(copy => <div class="tool-group" data-tool-copy={copy}>
           {row.map(tool => <span class="tool-icon" data-tool={tool.id} title={tool.name}><img src={tool.image} alt="" width="64" height="64" loading="eager" decoding="async" /></span>)}

@@ -1,19 +1,29 @@
-/* Repeated halves have the same width, so every loop joins at the same frame. */
-.welcome-widget.widget-tools{padding:0;overflow:hidden;isolation:isolate;container-type:inline-size;background:#252a33}
-.widget-tools .widget-heading{position:relative;z-index:2;padding:1rem 1.5625rem .875rem;background:linear-gradient(#171b23ee,#171b239c);-webkit-backdrop-filter:blur(.625rem);backdrop-filter:blur(.625rem);border-bottom:.0625rem solid #ffffff06}
-.tool-wall{position:absolute;inset:-1.125rem 0 auto;display:grid;gap:.75rem;opacity:.85;pointer-events:none}
-.tool-row{height:3rem;overflow:visible}
+/* The inverse 30° projection keeps every corner covered, even in wide cards.
+   Seven rows overscan the crop; each track repeats equal halves for a seamless loop. */
+.welcome-widget.widget-tools{--tool-gap:.875rem;--tool-size:max(3.25rem,calc((50cqw + 86.603cqh) / 6));--tool-pitch:calc(var(--tool-size) + var(--tool-gap));--tool-wall-width:calc(86.603cqw + 50cqh + var(--tool-pitch) * 2);padding:0;overflow:hidden;isolation:isolate;container-type:size;background:#252a33}
+.widget-tools .widget-heading{position:relative;z-index:2;isolation:isolate;align-self:flex-start;margin:1.125rem 1.5625rem;padding:0;background:none;border:0;text-shadow:0 .0625rem .25rem #000b}
+/* A soft, feathered patch behind the words, never a full-width title strip. */
+.widget-tools .widget-heading::before{content:"";position:absolute;z-index:-1;pointer-events:none;left:-1.25rem;top:50%;width:calc(100% + 3.25rem);max-width:calc(100cqw - 1rem);height:4.75rem;transform:translateY(-50%);background:#10141bc7;-webkit-backdrop-filter:blur(.625rem);backdrop-filter:blur(.625rem);-webkit-mask-image:radial-gradient(ellipse at 44% 50%,#000 20%,#000c 45%,transparent 74%);mask-image:radial-gradient(ellipse at 44% 50%,#000 20%,#000c 45%,transparent 74%)}
+.tool-wall{position:absolute;left:50%;top:50%;width:var(--tool-wall-width);display:grid;gap:var(--tool-gap);transform:translate(-50%,-50%) rotate(30deg);opacity:.9;pointer-events:none}
+.tool-row{height:var(--tool-size);overflow:visible}
 .tool-track{display:flex;width:max-content;animation:tool-drift 96s linear infinite;animation-play-state:paused;transform:translateX(var(--row-shift));will-change:transform}
-.tool-group{display:flex;align-items:center;gap:.75rem;padding-right:.75rem;flex-shrink:0;min-width:calc(100cqw + 3.75rem);justify-content:space-around}
-.tool-icon{display:grid;place-items:center;width:3rem;height:3rem;flex:0 0 3rem;background:#f3f4f5;border-radius:.625rem;padding:.4375rem;box-shadow:0 .25rem .75rem #0003}
+.tool-group{display:flex;align-items:center;gap:var(--tool-gap);padding-right:var(--tool-gap);flex-shrink:0;min-width:var(--tool-wall-width);justify-content:space-around}
+.tool-icon{display:grid;place-items:center;width:var(--tool-size);height:var(--tool-size);flex:0 0 var(--tool-size);background:none;border:0;padding:0;box-shadow:none}
 .tool-icon img{width:100%;height:100%;object-fit:contain;display:block}
-.tool-icon[data-tool=aseprite] img{image-rendering:pixelated}
-.widget-tools::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,#171b2355,transparent 15%,transparent 85%,#171b2355)}
+/* Use the supplied silhouettes, with no second tile around the native app icon. */
+.tool-icon[data-tool=unreal] img{clip-path:circle(35.5% at 50% 50%);transform:scale(1.39)}
+.tool-icon[data-tool=chatgpt] img{clip-path:inset(8% round 17%);transform:scale(1.17)}
+.tool-icon[data-tool=xmind] img{border-radius:21%}
+.tool-icon[data-tool=unity]{padding:.125rem;background:#f4f5f6;border-radius:22%}
+.tool-icon[data-tool=blender] img{transform:scale(1.05)}
+.tool-icon[data-tool=krita] img{transform:scale(1.12)}
+.tool-icon[data-tool=aseprite] img{image-rendering:pixelated;transform:scale(1.05)}
+.widget-tools::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,#171b2333,transparent 12%,transparent 88%,#171b2333)}
 html[data-startup=ready] .home[data-scene=profile][data-motion=playing]:not(.hub-open):not([data-visibility=hidden]) .tool-track{animation-play-state:running}
 /* Preserve the current phase when the shared pause button is used. */
 .home[data-motion=paused] .tool-track{animation:tool-drift 96s linear infinite!important;animation-play-state:paused!important}
 @keyframes tool-drift{from{transform:translateX(var(--row-shift))}to{transform:translateX(calc(-50% + var(--row-shift)))}}
-@media(max-width:1300px){.widget-tools .widget-heading{padding:.875rem 1.1875rem .75rem}}
-@media(max-width:900px){.widget-tools .widget-heading{padding:.875rem .9375rem .75rem}}
-@media(max-width:600px){.widget-tools .widget-heading{padding:.875rem .875rem .625rem}}
+@media(max-width:1300px){.widget-tools .widget-heading{margin:1rem 1.1875rem}}
+@media(max-width:900px){.widget-tools .widget-heading{margin:.9375rem}}
+@media(max-width:600px){.widget-tools .widget-heading{margin:.875rem}}
 @media(prefers-reduced-motion:reduce){.tool-track{animation-play-state:paused!important;will-change:auto}}
