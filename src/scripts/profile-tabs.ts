@@ -1,11 +1,11 @@
-import { profileSection, profileKeyIndex } from '../lib/profile-tabs';
+import { profileSection, profileKeyIndex, profileAnchor } from '../lib/profile-tabs';
 import { canOpenHub } from '../lib/project-hub';
-/** Only the lower pane scrolls. Each chapter keeps its own reading position. */
+/** The info portrait stays outside its reading pane; every chapter remembers its scroll. */
 export function createProfileTabs(shell: HTMLElement) {
   const tabs = [...shell.querySelectorAll<HTMLAnchorElement>('[data-profile-tab]')];
   const panels = [...shell.querySelectorAll<HTMLElement>('.resume-panel')];
-  const content = shell.querySelector<HTMLElement>('[data-profile-content]')!;
   const ids = tabs.map(tab => tab.dataset.profileTab!);
+  const pane = (id: string) => panels.find(panel => panel.id === id)!.querySelector<HTMLElement>('[data-profile-scroll]')!;
   const positions = new Map<string, number>();
   let current: string | undefined;
   let transition: Animation | undefined;
@@ -14,7 +14,7 @@ export function createProfileTabs(shell: HTMLElement) {
     const changed = current && current !== next;
     const direction = ids.indexOf(next) >= ids.indexOf(current || next) ? 1 : -1;
     transition?.cancel();
-    if (current) positions.set(current, content.scrollTop);
+    if (current) positions.set(current, pane(current).scrollTop);
     tabs.forEach(tab => {
       const active = tab.dataset.profileTab === next;
       tab.setAttribute('aria-selected', String(active));
@@ -29,7 +29,11 @@ export function createProfileTabs(shell: HTMLElement) {
       if (!off) transition = panel?.animate?.([{ opacity: .3, transform: `translateX(${direction * .65}rem)` }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.22,.8,.22,1)' });
     }
     current = next;
+    const content = pane(next);
     content.scrollTop = positions.get(next) || 0;
+    const anchor = profileAnchor(id);
+    const target = anchor ? content.querySelector<HTMLElement>(`[data-profile-anchor="${anchor}"]`) : null;
+    if (target) content.scrollTop += target.getBoundingClientRect().top - content.getBoundingClientRect().top;
     if (updateHash) history.replaceState(null, '', `#${next}`);
   }
   tabs.forEach((tab, index) => {
@@ -45,9 +49,10 @@ export function createProfileTabs(shell: HTMLElement) {
     });
   });
   window.addEventListener('hashchange', () => {
-    if (location.hash !== '#main-content') select(profileSection(location.hash, ids), false, false);
+    if (location.hash === '#main-content') { if (current) pane(current).focus({ preventScroll: true }); }
+    else select(location.hash, false, false);
   });
-  select(profileSection(location.hash, ids), false, false);
   shell.dataset.enhanced = 'true';
+  select(location.hash, false, false);
   return { select };
 }

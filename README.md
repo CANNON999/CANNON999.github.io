@@ -39,6 +39,8 @@ pnpm verify
 - [当前设计细则](docs/design-spec.md)：当前版本的页面、视觉、交互、动效、响应式和发布标准。
 - [开发日志](docs/development-log.md)：需求处理、诊断、每项修改、验证和发布过程。
 - [测试用例](docs/test-cases.md)：自动测试、浏览器回归和每次新增功能的测试规则。
+- [V1.5.0 测试报告](docs/test-results/2026-11-04-v1.5.0.md)：导航对齐、四章档案、固定照片与 14 工具图标墙。
+- [工具与学校图标来源](docs/icon-sources.md)：官方资源、许可记录和本地处理。
 - [V1.4.1 测试报告](docs/test-results/2026-11-04-v1.4.1.md)：个人介绍与作品背景回切闪烁修复。
 - [V1.4.0 测试报告](docs/test-results/2026-11-04-v1.4.0.md)：个人档案、头像照片、滚轮上限、封面选择与全站转场。
 - [PS5 转场调研](docs/ps5-transition-reference.md)：实机录像、时间点、观察和实现参数。
@@ -52,12 +54,12 @@ pnpm verify
 
 ## 日常修改位置
 
-个人档案六章及游戏时长在 `src/data/resume.json`；头像/照片路径在 `src/data/profile.json`，图片在 `public/images/profile/`。游戏卡片封面在 `public/images/games/`。更新记录时同步简历版本日期，不把原始简历 PDF 或私人联系方式直接放进 public。
+个人档案资料（四个标签、个人信息包含教育/在校/技能）及游戏时长在 `src/data/resume.json`；头像/照片路径在 `src/data/profile.json`，图片在 `public/images/profile/`。游戏卡片封面在 `public/images/games/`，校标在 `public/images/schools/`。更新记录时同步简历版本日期，不把原始简历 PDF 或私人联系方式直接放进 public。
 
 
 | 想修改什么 | 修改位置 |
 | --- | --- |
-| 姓名、邮箱、简介、学校与工具 | `src/data/profile.json` |
+| 姓名、邮箱、简介与首页摘要 | `src/data/profile.json` |
 | 单个作品的标题、简介、资源链接与正文 | `src/content/projects/对应作品.md` |
 | 作品封面和正文图片 | `public/images/` |
 | 独立欢迎页面与文字样式 | `src/pages/index.astro`、`src/styles/landing.css`（姓名读取 profile.json） |
@@ -66,7 +68,9 @@ pnpm verify
 | 作品 Hub、资源分组和转场 | `src/components/ProjectHub.astro`、`src/lib/project-hub.ts`、`src/scripts/project-hub.ts`、`src/styles/project-hub.css` |
 | 大屏比例与基础尺寸 | `src/styles/display-scale.css`；UI 尺寸使用 rem，Mac 基准 1rem=16px |
 | 主机界面布局与响应式样式 | `src/styles/console.css`；封面定位在 `src/scripts/rail-layout.ts` |
-| 作品列表、详情、个人档案样式 | `src/styles/global.css` |
+| 作品列表、详情样式 | `src/styles/global.css` |
+| 个人档案四标签、固定照片和教育校标 | `src/pages/about.astro`、`src/styles/profile.css`、`src/data/resume.json`、`src/scripts/profile-tabs.ts` |
+| 创作工具图标、顺序和动效 | `src/data/tools.json`、`src/components/ToolMarquee.astro`、`src/styles/tool-marquee.css` |
 | 滚轮、键盘、开场、动效偏好 | `src/scripts/console.ts` |
 | 作品与粒子背景切换 | `src/scripts/scene-background.ts` |
 | 粒子构图、运动、分辨率与性能策略 | `src/scripts/particle-field.ts`、`src/scripts/particles.ts` |
@@ -74,6 +78,10 @@ pnpm verify
 | 首次访问判断、图片等待和异常恢复 | `src/scripts/entry-gate.ts`、`src/scripts/image-readiness.ts`、`src/scripts/console.ts` |
 | 内容字段校验 | `src/content.config.ts` |
 | GitHub Pages 自动构建与发布 | `.github/workflows/pages.yml` |
+
+## 添加创作工具图标
+
+在 `public/images/tools/` 放官方来源的 SVG 或优化 WebP，在 `src/data/tools.json` 添加唯一 `id`、显示 `name`、本地 `image` 与官网 `url`。三个循环行、读屏列表和首页加载清单会自动更新；不必修改组件。同步 `docs/icon-sources.md` 来源记录，然后运行 `pnpm verify` 并查看工具卡，确认完整图标、标题模糊及无缝循环。不要引入外站热链或脚本型 SVG。
 
 ## 添加新作品
 
@@ -160,8 +168,8 @@ GitHub Pages 的可访问性仍受访客当地网络影响；国内访问速度�
 - 作品预览及 Hub 最大标题统一 700 字重；顶部封面右下小标题保留细体。
 
 - 首次进入先显示动态粒子和加载提示，开场至少展示 1 秒，期间同时加载首页图片；全部解码后平滑进入“欢迎你”；同标签页、站内返回及作品切换不强制重播。图片失败或超过 12 秒时可重试或主动进入；迟到的图片全部解码后仍会自动进入。手动重播可立即跳过。
-- 滚轮向下/右选择下一项，向上/左选择上一项；普通轻扫一项，连续新手势可在惯性尾部和动画中响应；持续稳定推移可以继续浏览，衰减惯性不连跳。
-- 单击作品封面直接在当前页面展开 Game Hub；滚轮/方向键先预览，Enter 展开；Home/End 跳首尾。Escape、返回按钮或浏览器后退回到原作品，前进可再次展开。独立 `/works/id/` 保持可分享、无脚本可用。
+- 滚轮向下/右选择下一项，向上/左选择上一项；普通轻扫一项，连续新手势可在惯性尾部和动画中响应；触控板一手势一步，衰减惯性不连跳；鼠标每阵最多五项、140ms 一步。
+- 单击、双击和在作品封面按 Enter 均只选中预览；通过下方大按钮展开 Game Hub。Home/End 跳首尾。Escape、返回按钮或浏览器后退回到原作品，前进可再次展开。独立 `/works/id/` 保持可分享、无脚本可用。
 - 欢迎你与个人介绍是作品栏最左端的两个独立方框，欢迎页只显示三行欢迎文字和粒子背景；Enter 可进入个人介绍。
 - Hub 左上角返回箭头位于封面之前，悬停/键盘选中亮起白色圆形背景；独立作品页也保留此入口。
 - 个人介绍固定六个组件：桌面三列、手机两列，没有隐藏分页。组件上的滚轮不切换作品。实习经历暂待补充；资料仍以真实 profile.json 为准。

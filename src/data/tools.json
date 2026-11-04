@@ -1,0 +1,86 @@
+[
+  {
+    "id": "unreal",
+    "name": "Unreal Engine",
+    "image": "/images/tools/unreal.webp",
+    "url": "https://www.unrealengine.com/"
+  },
+  {
+    "id": "blender",
+    "name": "Blender",
+    "image": "/images/tools/blender.webp",
+    "url": "https://www.blender.org/"
+  },
+  {
+    "id": "xmind",
+    "name": "XMind",
+    "image": "/images/tools/xmind.webp",
+    "url": "https://xmind.app/"
+  },
+  {
+    "id": "godot",
+    "name": "Godot",
+    "image": "/images/tools/godot.svg",
+    "url": "https://godotengine.org/"
+  },
+  {
+    "id": "unity",
+    "name": "Unity",
+    "image": "/images/tools/unity.svg",
+    "url": "https://unity.com/"
+  },
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "image": "/images/tools/chatgpt.webp",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "id": "tripo",
+    "name": "Tripo AI",
+    "image": "/images/tools/tripo.svg",
+    "url": "https://www.tripo3d.ai/"
+  },
+  {
+    "id": "gemini",
+    "name": "Gemini",
+    "image": "/images/tools/gemini.webp",
+    "url": "https://gemini.google.com/"
+  },
+  {
+    "id": "python",
+    "name": "Python",
+    "image": "/images/tools/python.svg",
+    "url": "https://www.python.org/"
+  },
+  {
+    "id": "cpp",
+    "name": "C++",
+    "image": "/images/tools/cpp.svg",
+    "url": "https://isocpp.org/"
+  },
+  {
+    "id": "csharp",
+    "name": "C#",
+    "image": "/images/tools/csharp.webp",
+    "url": "https://learn.microsoft.com/dotnet/csharp/"
+  },
+  {
+    "id": "eagle",
+    "name": "Eagle",
+    "image": "/images/tools/eagle.webp",
+    "url": "https://eagle.cool/"
+  },
+  {
+    "id": "aseprite",
+    "name": "Aseprite",
+    "image": "/images/tools/aseprite.webp",
+    "url": "https://www.aseprite.org/"
+  },
+  {
+    "id": "krita",
+    "name": "Krita",
+    "image": "/images/tools/krita.webp",
+    "url": "https://krita.org/"
+  }
+]

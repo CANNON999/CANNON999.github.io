@@ -305,7 +305,8 @@ motionButton.addEventListener('click', () => {
   updateMotion();
 });
 reduced.addEventListener('change', updateMotion);
-document.addEventListener('visibilitychange', () => { resetWheel(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
+document.body.dataset.visibility = document.hidden ? 'hidden' : 'visible';
+document.addEventListener('visibilitychange', () => { document.body.dataset.visibility = document.hidden ? 'hidden' : 'visible'; resetWheel(); if (document.hidden) { cancelAnimationFrame(frame); lastFrame = 0; } else resumePaint(); });
 window.addEventListener('resize', () => { positionRail(); ambientDust.resize(); resumePaint(); });
 // Moving between monitors / browser zoom can change DPR without a layout resize.
 function watchPixelRatio() {

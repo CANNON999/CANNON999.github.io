@@ -98,19 +98,34 @@ for (const id of embeddedHubs) {
   for (const kind of ['document', 'video', 'download']) if (!detail.includes(`data-resource-kind="${kind}"`)) failures.push(`${id}: missing ${kind} resource card.`);
   if (/<a\b[^>]*href="#"/.test(detail)) failures.push(`${id}: placeholders must not be dead links.`);
 }
-// V1.4 profile: fixed chrome sits outside the only scrolling content pane.
+// V1.5 profile: four chapters and a portrait outside the personal reader.
 const about = await readFile(resolve(root, 'about/index.html'), 'utf8');
-const chapters = ['education','experience','projects','campus','skills','games'];
+const chapters = ['info','experience','projects','games'];
 for (const id of chapters) {
   if (!about.includes(`aria-controls="${id}"`) || !about.includes(`id="${id}" role="tabpanel" aria-labelledby="profile-tab-${id}"`)) failures.push(`Missing linked resume chapter: ${id}`);
 }
 const fixedTabs = /<nav[^>]*class="profile-tabbar"[^>]*>[\s\S]*?<\/nav>/.exec(about);
 if (about.indexOf('</header>') > about.indexOf('<main') || !fixedTabs || fixedTabs.index + fixedTabs[0].length > about.indexOf('<main')) failures.push('Profile header and tabs must remain outside the reading pane.');
-if ([...about.matchAll(/role="tab"/g)].length !== 6) failures.push('Profile must have exactly six chapter tabs.');
+if ([...about.matchAll(/role="tab"/g)].length !== 4) failures.push('Profile must have exactly four chapter tabs.');
+const personalReader = /<div class="profile-scroll personal-scroll"[^>]*>([\s\S]+?)<\/div>\s*<aside class="portrait-rail"/.exec(about)?.[1];
+if (!personalReader || ['education','campus','skills'].some(id => !personalReader.includes(`data-profile-anchor="${id}"`)) || personalReader.includes('class="profile-portrait"')) failures.push('Merged personal chapters must scroll together with the portrait outside their reader.');
+for (const file of ['sjtu.webp','insa-lyon.webp']) if (!about.includes(`/images/schools/${file}`)) failures.push(`Missing official school mark: ${file}`);
 if (!about.includes('data-profile-content') || !about.includes('class="profile-portrait"') || !about.includes('aria-label="返回个人主页"')) failures.push('Missing profile scroll pane, portrait or back navigation.');
 if (images.filter(tag => attr(tag,'src') === '/images/profile/avatar.webp').length !== 3) failures.push('Home must use the supplied avatar in header, personal tile and identity widget.');
 if ([...about.matchAll(/class="game-stat-card/g)].length !== 4) failures.push('Game overview must have the total plus three real game cards.');
 for (const html of [home, collection, about]) if (!html.slice(0,html.indexOf('</head>')).includes('cannon-page-transition')) failures.push('Page transition controller must register before first paint.');
+const toolRows = [...home.matchAll(/<div class="tool-track">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g)].map(match => match[1]);
+const toolCatalogue = JSON.parse(await readFile('src/data/tools.json', 'utf8'));
+// Keep the standard declaration after the prefixed fallback: the production
+// optimizer otherwise may retain only WebKit's version, leaving Chromium sharp.
+if (!/\.widget-tools \.widget-heading\{[^}]*[;{]backdrop-filter:blur\(/.test(homeStyles)) failures.push('Tool heading must retain a standard backdrop blur in the production CSS.');
+if (toolRows.length !== 3 || !toolCatalogue.length) failures.push('Tool card needs three populated animated rows.');
+for (const row of toolRows) {
+  const icons = [...row.matchAll(/data-tool="([^"]+)"/g)].map(match => match[1]);
+  const half = icons.length / 2;
+  if (icons.length !== toolCatalogue.length * 2 || icons.slice(0, half).join(',') !== icons.slice(half).join(',') || new Set(icons).size !== toolCatalogue.length) failures.push('Each tool row must repeat one complete catalogue with identical halves.');
+}
+for (const tool of toolCatalogue) if (!home.includes(`<li>${tool.name}</li>`) || !images.some(image => attr(image,'src') === tool.image)) failures.push(`Tool needs a loaded local icon and readable name: ${tool.id}`);
 const sitemap = await readFile(resolve(root, 'sitemap.xml'), 'utf8');
 if (!sitemap.includes('https://cannon999.github.io/works/abyss/')) failures.push('Missing project sitemap route.');
 if (failures.length) {

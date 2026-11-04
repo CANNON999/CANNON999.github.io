@@ -1,10 +1,14 @@
 export const profileSections = [
-  { id: 'education', label: '教育背景' }, { id: 'experience', label: '工作经历' },
-  { id: 'projects', label: '项目经历' }, { id: 'campus', label: '在校经历' },
-  { id: 'skills', label: '个人技能' }, { id: 'games', label: '游戏经历' },
+  { id: 'info', label: '个人信息' }, { id: 'experience', label: '工作经历' },
+  { id: 'projects', label: '项目经历' }, { id: 'games', label: '游戏经历' },
 ] as const;
-export function profileSection(hash: string, ids: readonly string[]) {
+/** Existing shared chapter links still open the matching part of personal info. */
+export function profileAnchor(hash: string) {
   const id = hash.replace(/^#/, '');
+  return ['education', 'campus', 'skills'].includes(id) ? id : undefined;
+}
+export function profileSection(hash: string, ids: readonly string[]) {
+  const id = profileAnchor(hash) && ids.includes('info') ? 'info' : hash.replace(/^#/, '');
   return ids.includes(id) ? id : ids[0];
 }
 export function profileKeyIndex(key: string, current: number, count: number) {

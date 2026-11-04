@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import WelcomeWidgets from '../components/WelcomeWidgets.astro';
 import ProjectHub from '../components/ProjectHub.astro';
 import profile from '../data/profile.json';
+import tools from '../data/tools.json';
 import { getProjects, projectPath, categories } from '../lib/content';
 import '../styles/console.css';
 import '../styles/particles.css';
@@ -18,7 +19,7 @@ const entries = [
   ...projects.map(p => ({ id: p.id, kind: 'project', name: p.data.title, cover: p.data.cover || '', color: p.data.color, href: projectPath(p) })),
 ];
 const assetHash = createHash('sha256');
-for (const url of [...new Set([...entries.map(e => e.cover).filter(Boolean), profile.avatar])]) {
+for (const url of [...new Set([...entries.map(e => e.cover).filter(Boolean), profile.avatar, ...tools.map(tool => tool.image)])]) {
   // Astro relocates this module during prerender; the build cwd remains the project root.
   assetHash.update(url).update(readFileSync(`public${url}`));
 }

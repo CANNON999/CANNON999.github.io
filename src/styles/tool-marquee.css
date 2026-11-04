@@ -1,0 +1,19 @@
+/* Repeated halves have the same width, so every loop joins at the same frame. */
+.welcome-widget.widget-tools{padding:0;overflow:hidden;isolation:isolate;container-type:inline-size;background:#252a33}
+.widget-tools .widget-heading{position:relative;z-index:2;padding:1rem 1.5625rem .875rem;background:linear-gradient(#171b23ee,#171b239c);-webkit-backdrop-filter:blur(.625rem);backdrop-filter:blur(.625rem);border-bottom:.0625rem solid #ffffff06}
+.tool-wall{position:absolute;inset:-1.125rem 0 auto;display:grid;gap:.75rem;opacity:.85;pointer-events:none}
+.tool-row{height:3rem;overflow:visible}
+.tool-track{display:flex;width:max-content;animation:tool-drift 96s linear infinite;animation-play-state:paused;transform:translateX(var(--row-shift));will-change:transform}
+.tool-group{display:flex;align-items:center;gap:.75rem;padding-right:.75rem;flex-shrink:0;min-width:calc(100cqw + 3.75rem);justify-content:space-around}
+.tool-icon{display:grid;place-items:center;width:3rem;height:3rem;flex:0 0 3rem;background:#f3f4f5;border-radius:.625rem;padding:.4375rem;box-shadow:0 .25rem .75rem #0003}
+.tool-icon img{width:100%;height:100%;object-fit:contain;display:block}
+.tool-icon[data-tool=aseprite] img{image-rendering:pixelated}
+.widget-tools::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,#171b2355,transparent 15%,transparent 85%,#171b2355)}
+html[data-startup=ready] .home[data-scene=profile][data-motion=playing]:not(.hub-open):not([data-visibility=hidden]) .tool-track{animation-play-state:running}
+/* Preserve the current phase when the shared pause button is used. */
+.home[data-motion=paused] .tool-track{animation:tool-drift 96s linear infinite!important;animation-play-state:paused!important}
+@keyframes tool-drift{from{transform:translateX(var(--row-shift))}to{transform:translateX(calc(-50% + var(--row-shift)))}}
+@media(max-width:1300px){.widget-tools .widget-heading{padding:.875rem 1.1875rem .75rem}}
+@media(max-width:900px){.widget-tools .widget-heading{padding:.875rem .9375rem .75rem}}
+@media(max-width:600px){.widget-tools .widget-heading{padding:.875rem .875rem .625rem}}
+@media(prefers-reduced-motion:reduce){.tool-track{animation-play-state:paused!important;will-change:auto}}

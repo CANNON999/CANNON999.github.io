@@ -17,34 +17,43 @@ import '../styles/profile.css';
     <nav class="profile-tabbar" aria-label="简历章节" role="tablist">
       {profileSections.map((section, index) => <a href={`#${section.id}`} id={`profile-tab-${section.id}`} role="tab" aria-controls={section.id} aria-selected={index === 0 ? 'true' : 'false'} data-profile-tab={section.id}>{section.label}</a>)}
     </nav>
-    <main id="main-content" class="profile-content" tabindex="-1" aria-label="简历内容，可向下滚动" data-profile-content>
-      <section class="resume-panel" id="education" role="tabpanel" aria-labelledby="profile-tab-education" tabindex="0">
-        <div class="section-heading"><div><p class="profile-overline">01 / EDUCATION</p><h2>教育背景</h2></div><p>从学习与实践出发，走向游戏创作。</p></div>
-        <div class="education-layout"><div class="education-list">{resume.education.map((entry, index) => <article class="education-entry"><div class="school-mark" aria-hidden="true">{entry.mark}</div><div class="education-copy"><span class="entry-number">0{index + 1}</span><h3>{entry.school}</h3><p>{entry.department}</p><div class="entry-meta"><span>{entry.major} · {entry.degree}</span><span>{entry.period}</span></div></div></article>)}</div><figure class="profile-portrait"><img src={profile.portrait} alt="肖冠荣，身穿深色西装与红色领带的正式照片" width="768" height="1152" loading="eager" decoding="async" /><figcaption>{profile.name}<span>PLAY. THINK. CREATE.</span></figcaption></figure></div>
-        <p class="profile-note">经历与游玩记录整理自 {resume.edition}。</p>
+    <main id="main-content" class="profile-content" tabindex="-1" aria-label="简历内容" data-profile-content>
+      <section class="resume-panel personal-information" id="info" role="tabpanel" aria-labelledby="profile-tab-info">
+        <div class="profile-scroll personal-scroll" data-profile-scroll tabindex="0" aria-label="个人信息，可向下滚动">
+          <div class="section-heading"><div><p class="profile-overline">01 / PERSONAL INFORMATION</p><h2>个人信息</h2></div><p>学习、经历与创作的积累。</p></div>
+          <section class="personal-section" id="education" data-profile-anchor="education" aria-labelledby="education-heading"><h3 id="education-heading" class="personal-section-title">教育背景</h3>
+            <div class="education-list">{resume.education.map((entry, index) => <article class="education-entry"><div class="school-mark"><img src={entry.logo} alt={`${entry.school}校标`} width="100" height="100" loading="eager" decoding="async" /></div><div class="education-copy"><span class="entry-number">0{index + 1}</span><h3>{entry.school}</h3><p>{entry.department}</p><div class="entry-meta"><span>{entry.major} · {entry.degree}</span><span>{entry.period}</span></div></div></article>)}</div>
+          </section>
+          <section class="personal-section" id="campus" data-profile-anchor="campus" aria-labelledby="campus-heading"><h3 id="campus-heading" class="personal-section-title">在校经历</h3>
+            <article class="campus-card"><div class="campus-art" aria-hidden="true"><WidgetIcon name="game" /><span>PLAY<br />TOGETHER.</span></div><div><p class="profile-overline">GAME MAKING COMMUNITY</p><h3>{resume.campus.name}</h3><p class="entry-period">{resume.campus.role} · {resume.campus.period}</p><p>{resume.campus.description}</p><div class="profile-chips">{resume.campus.activities.map(activity=><span>{activity}</span>)}</div></div></article>
+          </section>
+          <section class="personal-section" id="skills" data-profile-anchor="skills" aria-labelledby="skills-heading"><h3 id="skills-heading" class="personal-section-title">个人技能</h3>
+            <div class="skills-grid">{resume.skills.map((group,i)=><article class="skill-card"><WidgetIcon name={['tools','work','document'][i]} /><p class="profile-overline">{group.english}</p><h3>{group.title}</h3><ul>{group.items.map(skill=><li>{skill}</li>)}</ul></article>)}</div>
+          </section>
+          <p class="profile-note">经历与游玩记录整理自 {resume.edition}。</p>
+        </div>
+        <aside class="portrait-rail" aria-label="个人照片"><figure class="profile-portrait"><img src={profile.portrait} alt="肖冠荣，身穿深色西装与红色领带的正式照片" width="768" height="1152" loading="eager" decoding="async" /><figcaption>{profile.name}<span>PLAY. THINK. CREATE.</span></figcaption></figure></aside>
       </section>
-      <section class="resume-panel" id="experience" role="tabpanel" aria-labelledby="profile-tab-experience" tabindex="0">
+      <section class="resume-panel" id="experience" role="tabpanel" aria-labelledby="profile-tab-experience">
+        <div class="profile-scroll" data-profile-scroll tabindex="0" aria-label="工作经历，可向下滚动">
         <div class="section-heading"><div><p class="profile-overline">02 / EXPERIENCE</p><h2>工作经历</h2></div><p>从玩法构想到可以游玩的关卡。</p></div>
         {resume.experience.map(entry => <article class="experience-card"><div class="experience-summary"><span class="company-monogram" aria-hidden="true">miHoYo</span><div><h3>{entry.company}</h3><p>{entry.team} <span> / </span> {entry.role}</p></div><span class="entry-period">{entry.period}</span></div><div class="responsibility-list">{entry.items.map((item,i)=><div><span aria-hidden="true">0{i+1}</span><div><h4>{item.title}</h4><p>{item.text}</p></div></div>)}</div></article>)}
+        </div>
       </section>
-      <section class="resume-panel" id="projects" role="tabpanel" aria-labelledby="profile-tab-projects" tabindex="0">
+      <section class="resume-panel" id="projects" role="tabpanel" aria-labelledby="profile-tab-projects">
+        <div class="profile-scroll" data-profile-scroll tabindex="0" aria-label="项目经历，可向下滚动">
         <div class="section-heading"><div><p class="profile-overline">03 / PROJECTS</p><h2>项目经历</h2></div><a href="/works/">打开作品集 <span aria-hidden="true">↗</span></a></div>
         <div class="resume-projects">{resume.projects.map((entry,i)=><article class="resume-project"><span class="project-index" aria-hidden="true">{String(i+1).padStart(2,'0')}</span><div><div class="project-heading"><h3>{entry.title}</h3><span class="entry-period">{entry.period}</span></div><p class="project-role">{entry.role}</p><p>{entry.description}</p>{entry.contribution && <p>{entry.contribution}</p>}{entry.link && <a class="resume-link" href={entry.link} target={entry.link.startsWith('https:') ? '_blank' : undefined} rel={entry.link.startsWith('https:') ? 'noopener noreferrer' : undefined}>{entry.linkLabel} <span aria-hidden="true">↗</span></a>}</div></article>)}</div>
+        </div>
       </section>
-      <section class="resume-panel" id="campus" role="tabpanel" aria-labelledby="profile-tab-campus" tabindex="0">
-        <div class="section-heading"><div><p class="profile-overline">04 / CAMPUS</p><h2>在校经历</h2></div><p>与同样热爱游戏的人，一起交流和创作。</p></div>
-        <article class="campus-card"><div class="campus-art" aria-hidden="true"><WidgetIcon name="game" /><span>PLAY<br />TOGETHER.</span></div><div><p class="profile-overline">GAME MAKING COMMUNITY</p><h3>{resume.campus.name}</h3><p class="entry-period">{resume.campus.role} · {resume.campus.period}</p><p>{resume.campus.description}</p><div class="profile-chips">{resume.campus.activities.map(activity=><span>{activity}</span>)}</div></div></article>
-      </section>
-      <section class="resume-panel" id="skills" role="tabpanel" aria-labelledby="profile-tab-skills" tabindex="0">
-        <div class="section-heading"><div><p class="profile-overline">05 / SKILLS</p><h2>个人技能</h2></div><p>把设计意图，变成可运行的体验。</p></div>
-        <div class="skills-grid">{resume.skills.map((group,i)=><article class="skill-card"><WidgetIcon name={['tools','work','document'][i]} /><p class="profile-overline">{group.english}</p><h3>{group.title}</h3><ul>{group.items.map(skill=><li>{skill}</li>)}</ul></article>)}</div>
-      </section>
-      <section class="resume-panel" id="games" role="tabpanel" aria-labelledby="profile-tab-games" tabindex="0">
-        <div class="section-heading"><div><p class="profile-overline">06 / PLAYER RECORD</p><h2>游戏经历</h2></div><p>{resume.gaming.summary}</p></div>
+      <section class="resume-panel" id="games" role="tabpanel" aria-labelledby="profile-tab-games">
+        <div class="profile-scroll" data-profile-scroll tabindex="0" aria-label="游戏经历，可向下滚动">
+        <div class="section-heading"><div><p class="profile-overline">04 / PLAYER RECORD</p><h2>游戏经历</h2></div><p>{resume.gaming.summary}</p></div>
         <div class="game-showcase"><article class="game-stat-card total-playtime"><div class="playtime-emblem" aria-hidden="true"><WidgetIcon name="game" /></div><p class="profile-overline">STEAM PLAYTIME</p><strong>{resume.gaming.totalHours}<small>小时</small></strong><h3>时间留下的热爱</h3><p>Steam 累计游玩时长</p></article>{resume.gaming.featured.map(game=><article class="game-stat-card"><p class="game-card-label">{game.label}</p><a class="played-cover" href={game.url} target="_blank" rel="noopener noreferrer" aria-label={`${game.title} · Steam 官方页面`}><img src={game.image} width="460" height="215" alt={`${game.title}游戏封面`} loading="eager" decoding="async" /></a><h3>{game.title}</h3><strong>{game.hours}<small>小时</small></strong><p>累计游玩</p></article>)}</div>
         <div class="game-list-heading"><h3>我的游戏足迹</h3><span>{resume.edition}</span></div>
         <div class="game-categories">{resume.gaming.groups.map((group,i)=><article><div class="game-category-heading"><span aria-hidden="true">0{i+1}</span><h4>{group.title}</h4></div><ul>{group.games.map(game=><li><span>{game.name}</span>{'hours' in game && <span>{game.hours}</span>}</li>)}</ul></article>)}</div>
         <p class="profile-note">时长按简历中的个人记录展示；系列合计与单作时长分别标注。游戏封面归各自权利人所有，点击可查看官方页面。</p>
+        </div>
       </section>
     </main>
   </div>

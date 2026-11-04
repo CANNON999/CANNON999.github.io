@@ -1,6 +1,7 @@
 ---
 import profile from '../data/profile.json';
 import WidgetIcon from './WidgetIcon.astro';
+import ToolMarquee from './ToolMarquee.astro';
 import type { Project } from '../lib/content';
 import '../styles/welcome.css';
 const { projects } = Astro.props as { projects: Project[] };
@@ -19,10 +20,7 @@ const featured = projects.filter(p => p.data.category === 'level' || p.data.cate
     <p class="widget-value">{profile.education.school}<span>{profile.education.period}</span></p>
     <p class="widget-detail">{profile.education.department}</p>
   </article>
-  <article class="welcome-widget widget-tools" data-widget="tools">
-    <div class="widget-heading"><WidgetIcon name="tools" /><h2>创作工具</h2></div>
-    <div class="tool-list">{profile.tools.map((tool, i) => <span><b aria-hidden="true">{['U', 'B', 'C⁺', 'X'][i]}</b>{tool}</span>)}</div>
-  </article>
+  <ToolMarquee />
   <article class="welcome-widget widget-projects" data-widget="projects">
     <div class="widget-heading"><WidgetIcon name="work" /><h2>项目经历</h2><span class="widget-count">{String(projects.length).padStart(2, '0')}</span></div>
     <p class="widget-description">从设计图纸，到可游玩的空间。</p>

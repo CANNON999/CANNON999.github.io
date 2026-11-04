@@ -1,9 +1,9 @@
 {
   "edition": "2026 夏季简历",
   "education": [
-    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "法语", "degree": "本科", "period": "2021.08 — 2025.06", "mark": "SJTU" },
-    { "school": "里昂国立应用科学技术学院", "department": "机械学院", "major": "机械专业", "degree": "硕士", "period": "2025.08 — 2026.02", "mark": "INSA" },
-    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "机械工程", "degree": "硕士", "period": "2025.09 — 2028.03", "mark": "SJTU" }
+    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "法语", "degree": "本科", "period": "2021.08 — 2025.06", "mark": "SJTU", "logo": "/images/schools/sjtu.webp" },
+    { "school": "里昂国立应用科学技术学院", "department": "机械学院", "major": "机械专业", "degree": "硕士", "period": "2025.08 — 2026.02", "mark": "INSA", "logo": "/images/schools/insa-lyon.webp" },
+    { "school": "上海交通大学", "department": "巴黎卓越工程师学院", "major": "机械工程", "degree": "硕士", "period": "2025.09 — 2028.03", "mark": "SJTU", "logo": "/images/schools/sjtu.webp" }
   ],
   "experience": [{
     "company": "上海米哈游网络科技股份有限公司",
